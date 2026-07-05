@@ -1,0 +1,479 @@
+# Capítulo 15: Propiedad y Permisos de Archivos
+
+## 15.1 Introducción
+
+La **propiedad de archivo** es crítica para la seguridad de los archivos. Cada archivo tiene un usuario propietario y un propietario de grupo.
+
+Este capítulo se centrará en cómo especificar el usuario y grupo propietarios de un archivo. Además, se explorará el concepto de los **permisos** de archivo y directorio, incluyendo cómo cambiar los permisos de los archivos y directorios. Por defecto los permisos son los permisos establecidos para los archivos y directorios cuando se crean inicialmente.
+
+> **¿Por qué obtener una certificación LPI?** LPI ofrece credenciales que son reconocidas a lo ancho de toda la industria como un medio de validar habilidades a través de todas las distribuciones de Linux; para proporcionarte conocimiento básico y el más amplio rango de oportunidades de trabajo. Linux Essentials es un primer gran paso en acelerar tu carrera tecnológica.
+
+## 15.2 Propiedad de Archivo
+
+De forma predeterminada, los usuarios poseen los archivos que crean. Mientras que esta propiedad puede cambiarse, esta función requiere privilegios administrativos. Aunque la mayoría de los comandos generalmente muestran al usuario propietario como un nombre, el sistema operativo en realidad asociará la propiedad del usuario con el **UID** para ese nombre de usuario.
+
+Cada archivo también tiene un **grupo propietario**. En el capítulo anterior sobre la creación de los usuarios y grupos hablamos sobre el grupo primario del usuario. De forma predeterminada, el grupo primario del usuario que crea el archivo será el grupo propietario de los nuevos archivos. Los usuarios pueden cambiar a un propietario de grupo de un archivo a cualquier grupo al que pertenecen. De manera similar al usuario propietario, la asociación de un archivo con un grupo no está realmente hecha por nombre dentro del sistema operativo, sino por el **GID** del grupo.
+
+Puesto que la propiedad se determina por el UID y GID asociado con un archivo, cambiar el UID de un usuario (o borrar el usuario) tiene el efecto de hacer que el archivo que originalmente fue propiedad del usuario no tenga ningún usuario propietario real. Cuando no hay ningún UID en el archivo `/etc/passwd` que coincide con el UID del propietario del archivo, el UID (el número) se mostrará como el usuario propietario del archivo en lugar del nombre de usuario (que ya no existe). Lo mismo ocurre con los grupos.
+
+El comando `id` puede ser útil para verificar la cuenta del usuario que estás usando y qué grupos están disponibles para ti. Mediante la visualización de la salida de este comando, puedes ver la información de la identidad del usuario expresada como un número y un nombre.
+
+La salida del comando `id` muestra el nombre de la cuenta de usuario y el UID del usuario actual seguido por el GID y el nombre del grupo primario y los GIDs y los nombres de grupo de todas las membresías de grupos:
+
+```bash
+sysadmin@localhost:~$ id
+uid=500(sysadmin) gid=500(sysadmin) groups=500(sysadmin),10001(research),10002(development) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+```
+
+El ejemplo anterior muestra que el usuario tiene un UID de 500 para la cuenta del usuario `sysadmin`. Muestra que el grupo primario para este usuario tiene un GID de 500 para el grupo `sysadmin`.
+
+Ya que la cuenta de usuario y la cuenta del grupo primario tienen el mismo nombre y el mismo identificador numérico, esto indica que este usuario está en un **grupo privado de usuario** (UPG). Además, el usuario pertenece a dos grupos adicionales: el grupo `research` (o «investigación» en español) con un GID de 10001 y el grupo `development` (o «desarrollo» en español) con un GID de 10002.
+
+Cuando se crea un archivo, éste pertenecerá al usuario actual y su grupo primario actual. Si el usuario del ejemplo anterior ejecutara un comando como `touch` para crear un archivo y luego ver los detalles de archivo, la salida sería como la siguiente:
+
+```bash
+sysadmin@localhost:~$ touch /tmp/filetest1
+sysadmin@localhost:~$ ls -l /tmp/filetest1
+-rw-rw-r--. 1 sysadmin sysadmin 0 Oct 21 10:18 /tmp/filetest1
+```
+
+El usuario propietario del archivo es `sysadmin` y el grupo propietario es `sysadmin`.
+
+## 15.3 Los Comandos newgrp y groups
+
+Si sabes que el archivo que vas crear debe pertenecer a un grupo diferente que tu grupo primario actual, entonces puedes utilizar el comando `newgrp` para cambiar tu grupo primario actual.
+
+Como se mostró anteriormente, el comando `id` lista tu información de identidad, incluyendo tu pertenencia a grupos. Si sólo estás interesado en conocer a qué grupos perteneces, puedes ejecutar el comando `groups`:
+
+```bash
+sysadmin@localhost:~$ groups
+sysadmin research development
+```
+
+La salida de `groups` puede no ser tan detallada como la salida del comando `id`, pero si todo lo que necesitas saber es a qué grupos puedes cambiar utilizando el comando `newgrp`, entonces el comando `groups` proporciona la información que necesitas. La salida del comando `id` muestra tu grupo primario actual, por lo que es útil verificar que el comando `newgrp` tuvo éxito.
+
+Por ejemplo, si el usuario `sysadmin` quería tener un archivo que fuera propiedad del grupo `research`, pero no era el grupo primario del usuario, el usuario podría utilizar el comando `newgrp` y comprobar el grupo primario correcto con el comando `id` antes de crear el nuevo archivo:
+
+```bash
+sysadmin@localhost:~$ id
+uid=502(sysadmin) gid=503(sysadmin) groups=503(sysadmin),10001(research),10002(development) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+sysadmin@localhost:~$ newgrp research
+sysadmin@localhost:~$ id
+uid=502(sysadmin) gid=10001(research) groups=503(sysadmin),10001(research),10002(development) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+```
+
+De la salida de los comandos anteriores, primero puedes ver que el GID del usuario es de 503 para el usuario `sysadmin`, y luego se ejecuta el comando `newgrp research`, y después el GID primario del usuario es de 10001, el grupo `research`. Después de estos comandos, si el usuario quiere crear otro archivo y ver sus detalles, el nuevo archivo pertenecería al grupo `research`:
+
+```bash
+sysadmin@localhost:~$ touch /tmp/filetest2
+sysadmin@localhost:~$ ls -l /tmp/filetest2
+-rw-r--r--. 1 sysadmin research 0 Oct 21 10:53 /tmp/filetest2
+```
+
+El comando `newgrp` abre un shell nuevo; mientras el usuario permanece en ese shell, el grupo primario no cambiará. Para cambiar el grupo principal hacia el original, el usuario podría abandonar el shell nuevo ejecutando el comando `exit`. Por ejemplo:
+
+```bash
+sysadmin@localhost:~$ id
+uid=502(sysadmin) gid=10001(research) groups=503(sysadmin),10001(research),10002(development) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+sysadmin@localhost:~$ exit
+exit
+sysadmin@localhost:~$ id
+uid=502(sysadmin) gid=503(sysadmin) groups=503(sysadmin),10001(research),10002(development) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+```
+
+Se requieren privilegios administrativos para cambiar permanentemente el grupo primario del usuario. El usuario root ejecutaría el comando `usermod -g groupname username`.
+
+## 15.4 Los Comandos chgrp y stat
+
+Si quieres cambiar el grupo propietario de un archivo existente, puedes utilizar el comando `chgrp`. Como un usuario sin privilegios administrativos, el comando `chgrp` puede utilizarse solamente para cambiar el grupo propietario del archivo a un grupo del que el usuario ya sea miembro. Como usuario root, el comando `chgrp` puede utilizarse para cambiar el grupo propietario de cualquier archivo a cualquier grupo.
+
+Mientras que puedes ver la propiedad de un archivo con la opción `-l` del comando `ls`, el sistema proporciona otro comando que es útil al visualizar los permisos y la propiedad de los archivos: el comando `stat`. El comando `stat` muestra información más detallada acerca de un archivo, incluyendo el grupo propietario tanto por nombre de grupo como por el número GID:
+
+```bash
+sysadmin@localhost:~$ stat /tmp/filetest1
+  File: `/tmp/filetest1'
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: fd00h/64768d	Inode: 31477       Links: 1
+Access: (0664/-rw-rw-r--)  Uid: (  502/sysadmin)   Gid: (  503/sysadmin)
+Access: 2013-10-21 10:18:02.809118163 -0700
+Modify: 2013-10-21 10:18:02.809118163 -0700
+Change: 2013-10-21 10:18:02.809118163 -0700
+```
+
+El comando `stat` también será útil más adelante en este capítulo cuando hablemos de los permisos, ya que proporciona más detalles que el comando `ls -l`.
+
+El siguiente ejemplo muestra al usuario `sysadmin` cambiando la propiedad de grupo de un archivo que posee el usuario:
+
+```bash
+sysadmin@localhost:~$ chgrp development /tmp/filetest1
+sysadmin@localhost:~$ stat /tmp/filetest1
+  File: `/tmp/filetest1'
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: fd00h/64768d	Inode: 528677       Links: 1
+Access: (0664/-rw-rw-r--)  Uid: (  500/sysadmin)   Gid: (  502/development)
+Access: 2013-10-21 10:18:02.809118163 -0500
+Modify: 2013-10-21 10:18:02.809118163 -0500
+Change: 2013-10-21 10:18:02.809118163 -0500
+sysadmin@localhost:~$
+```
+
+Si un usuario intenta modificar la propiedad de grupo de un archivo que no posee, recibirá un mensaje de error:
+
+```bash
+sysadmin@localhost:~$ chgrp development /etc/passwd
+chgrp: changing group of '/etc/passwd': Operation not permitted
+```
+
+A veces quieres no sólo cambiar los archivos en el directorio actual, pero también los archivos en los subdirectorios. Cuando se ejecuta con la opción `-R` (**recursivo**), el comando `chgrp` operará no sólo en el directorio actual, sino también en todos los directorios que pueden estar anidados bajo el directorio especificado. La operación también afectará a todos los archivos en los subdirectorios, no sólo en los directorios.
+
+El siguiente ejemplo ilustra el uso de la opción `-R`:
+
+```bash
+sysadmin@localhost:~$ cp -r /etc/sound .
+sysadmin@localhost:~$ ls -ld sound
+drwxr-xr-x 1 sysadmin sysadmin 0 Dec 11 02:02 sound
+sysadmin@localhost:~$ ls -lR sound
+sound:
+total 4
+drwxr-xr-x. 2 sysadmin sysadmin 4096 Oct 28 13:06 events
+
+sound/events:
+total 48
+-rw-r--r--. 1 sysadmin sysadmin 27223 Oct 28 13:06 gnome-2.soundlist
+-rw-r--r--. 1 sysadmin sysadmin 18097 Oct 28 13:06 gtk-events-2.soundlist
+sysadmin@localhost:~$ chgrp -R development sound
+sysadmin@localhost:~$ ls -ld sound
+drwxr-xr-x. 3 sysadmin development 4096 Oct 28 13:06 sound
+sysadmin@localhost:~$ ls -lR sound
+sound:
+total 4
+drwxr-xr-x. 2 sysadmin development 4096 Oct 28 13:06 events
+
+sound/events:
+-rw-r--r--. 1 sysadmin development 27223 Oct 28 13:06 gnome-2.soundlist
+-rw-r--r--. 1 sysadmin development 18097 Oct 28 13:06 gtk-events-2.soundlist
+sysadmin@localhost:~$
+```
+
+## 15.5 Comando chown
+
+El comando `chown` permite al usuario root cambiar el usuario propietario de archivos y directorios. Un usuario normal no puede utilizar este comando para cambiar el usuario propietario de un archivo, ni siquiera para pasar la propiedad de uno de sus propios archivos a otro usuario. Sin embargo, el comando `chown` también permite cambiar la propiedad de grupo, que se puede lograr a través del root o el propietario del archivo.
+
+Existen tres maneras diferentes de ejecutar el comando `chown`:
+
+1. **Cambiar sólo al usuario propietario** del archivo. Por ejemplo, si el usuario root quiere cambiar la propiedad de usuario del archivo `abc.txt` al usuario `ted`, entonces el siguiente comando puede ser ejecutado:
+
+   ```bash
+   root@localhost:~# chown ted abc.txt
+   ```
+
+2. **Cambiar ambos el usuario y el grupo**; esto también requiere privilegios de root. Para lograr esto, debes separar al usuario y el grupo por dos puntos o un punto. Por ejemplo:
+
+   ```bash
+   root@localhost:~# chown user:group /path/to/file
+   root@localhost:~# chown user.group /path/to/file
+   ```
+
+3. **Cambiar sólo la propiedad de grupo** (igual que `chgrp`), disponible incluso sin privilegios de root. Para usar `chown` para cambiar sólo la propiedad de grupo del archivo, usar dos puntos o un punto como un prefijo para el nombre del grupo:
+
+   ```bash
+   root@localhost:~#  chown :group /path/to/file
+   root@localhost:~#  chown .group /path/to/file
+   ```
+
+## 15.6 Permisos
+
+Al ejecutar el comando `ls -l`, la salida resultante muestra diez caracteres al principio de cada línea, que indican el tipo de archivo y los permisos del archivo:
+
+- El primer carácter indica el **tipo de archivo**.
+- Los caracteres 2-4 indican los permisos para el **usuario** al que pertenece el archivo.
+- Los caracteres 5-7 indican los permisos para el **grupo** al que pertenece el archivo.
+- Los caracteres 8-10 indican los permisos para «**otros**» o lo que se conoce a veces como los permisos del mundo. Esto incluiría todos los usuarios que no sean el propietario del archivo o un miembro del grupo del archivo.
+
+Por ejemplo, considera la salida del siguiente comando:
+
+```bash
+root@localhost:~# ls -l /etc/passwd
+-rw-r--r--. 1 root root 4135 May 27 21:08 /etc/passwd
+```
+
+Basándose en la salida del comando anterior, los primeros diez caracteres podrían ser descritos por la siguiente tabla:
+
+| Carácter | Tipo de Archivo |
+|---|---|
+| `-` | Un archivo normal que puede estar vacío, contener texto o datos binarios. |
+| `d` | Un archivo de directorio que contiene los nombres de otros archivos y enlaces a los mismos. |
+| `l` | Un **enlace simbólico** es un nombre de archivo que hace referencia (apunta) a otro archivo. |
+| `b` | Un archivo de bloque es el que se refiere a un dispositivo de hardware de bloque donde los datos se leen en bloques de datos. |
+| `c` | Un archivo de caracteres es aquel que se refiere a un dispositivo de hardware de caracteres, donde se leen los datos un byte a la vez. |
+| `p` | Un archivo «**pipe**» («barra vertical» en español) funciona de forma similar al símbolo de barra vertical, lo que permite a la salida de un proceso comunicarse con otro proceso por el archivo pipe, donde se utiliza la salida de un proceso como entrada para el otro proceso. |
+| `s` | Un archivo de socket permite que se comuniquen dos procesos, donde se permite a ambos procesos enviar o recibir datos. |
+
+A pesar de que todos los tipos de archivos están listados en la tabla anterior, lo más probable es que nunca te encontrarás nada más que archivos regulares, directorios y archivos de enlace, a menos que explores el directorio `/dev`.
+
+Los caracteres de la parte de permisos de la salida tienen los siguientes significados:
+
+- `r` significa el permiso de **leer**
+- `w` significa el permiso de **escribir**
+- `x` significa el permiso de **ejecutar**
+
+Los permisos establecidos en estos archivos determinan el nivel de acceso que un usuario va a tener en el archivo. Cuando un usuario ejecuta un programa y el programa accede a un archivo, los permisos se comprueban para determinar si el usuario tiene los derechos de acceso correctos en el archivo.
+
+Los propios permisos son engañosamente simples y tienen un significado diferente dependiendo de si se aplican a un archivo o un directorio:
+
+| Permiso | Significado en un archivo | Significado en un directorio |
+|---|---|---|
+| `r` | El proceso puede leer el contenido del archivo, es decir, los contenidos se pueden ver y copiar. | Los nombres de archivo en el directorio se pueden enumerar, pero otros detalles no están disponibles. |
+| `w` | El proceso puede escribir en este archivo, por lo que los cambios se pueden guardar. Ten en cuenta que el permiso `w` realmente requiere el permiso `r` en un archivo para que funcione correctamente. | Los archivos se pueden agregar a un directorio o quitar del mismo. Ten en cuenta que el permiso `w` requiere el permiso `x` en el directorio para que funcione correctamente. |
+| `x` | El archivo se puede ejecutar o correr como un proceso. | El usuario puede utilizar el comando `cd` para «entrar» al directorio y utilizar el directorio en una ruta de acceso para acceder a los archivos y, potencialmente, a los subdirectorios de este directorio. |
+
+### 15.6.1 Comprendiendo los Permisos
+
+Mientras que la tabla anterior puede ser una referencia útil, por sí sola no ofrece una descripción clara de cómo funcionan los permisos. Para entender mejor cómo funcionan los permisos, considera los siguientes escenarios.
+
+Para entender estos escenarios, primero debes entender el siguiente contexto: existe el directorio `/` con un usuario propietario root, un grupo propietario root y los permisos `rwxr-xr-x`. Bajo `/` está el directorio `/data`, y dentro de `/data` se almacena el archivo `abc.txt`.
+
+También debes entender que:
+
+- Si eres el propietario del archivo/directorio, entonces sólo los permisos de propiedad de usuario se utilizarán para determinar el acceso a ese archivo/directorio.
+- Si no eres el propietario, pero eres un miembro del grupo que posee el archivo/directorio, entonces sólo los permisos de propiedad de grupo se utilizarán para determinar el acceso.
+- Si no eres el propietario y tampoco eres un miembro del grupo de archivos o directorios, entonces los permisos serían «otros».
+
+#### 15.6.1.1 Escenario #1 - La importancia del Acceso al Directorio
+
+**Pregunta:** ¿Qué acceso tendría el usuario `bob` en el archivo `abc.txt`?
+
+**Respuesta:** Ninguno
+
+**Explicación:** Al principio podría parecer que el usuario `bob` puede ver el contenido del archivo `abc.txt`, igual que copiar el archivo, modificar su contenido y ejecutarlo como un programa. Esta conclusión errónea sería el resultado de tener en cuenta únicamente permisos del archivo (`rwx` para el usuario `bob` en este caso).
+
+Sin embargo, para hacer algo con el archivo, el usuario debe primero «entrar» al directorio `/data`. Los permisos para `bob` en el directorio `/data` son los permisos para «otros» (`r--`), que significa `bob` no puede utilizar ni siquiera el comando `cd` para entrar al directorio. Si el permiso de ejecutar (`--x`) fuera configurado para el directorio, entonces el usuario `bob` sería capaz de «entrar» al directorio, lo que significa que se aplicarían los permisos del propio archivo.
+
+**Lección aprendida:** Los permisos de todos los directorios padres deben considerarse antes de considerar los permisos en un archivo específico.
+
+#### 15.6.1.2 Escenario #2 - Visualizar el Contenido del Directorio
+
+**Pregunta:** ¿Quién puede utilizar el comando `ls` para mostrar el contenido del directorio `/data` (`ls /data`)?
+
+**Respuesta:** Todos los usuarios
+
+**Explicación:** Todo lo que es necesario para poder ver el contenido de un directorio es el permiso `r` en el directorio (y poder acceder a los directorios padres). El permiso `x` para todos los usuarios en el directorio `/` significa que todos los usuarios pueden usar `/` como parte de la ruta, así que todo el mundo puede pasar a través del directorio `/` al directorio `/data`. El permiso de `r` para todos los usuarios en el directorio `/data` significa que todos los usuarios pueden utilizar el comando `ls` para ver el contenido. Esto incluye los archivos ocultos, entonces el comando `ls -a` también funciona en este directorio.
+
+Sin embargo, ten en cuenta que para ver los detalles de los archivos (`ls -l`) se requiere también el permiso `x` en el directorio. Así que mientras el usuario root y los miembros del grupo root tienen este acceso en el directorio `/data`, otros usuarios no pueden ejecutar `ls -l /data`.
+
+**Lección aprendida:** El permiso `r` permite a un usuario ver un listado del directorio.
+
+#### 15.6.1.3 Escenario #3 - Eliminar el Contenido del Directorio
+
+**Pregunta:** ¿Quién puede eliminar el archivo `/data/abc.txt`?
+
+**Respuesta:** Sólo el usuario root
+
+**Explicación:** Un usuario no necesita ningún permiso en el archivo para eliminarlo. El permiso `w` en el directorio en el cual se almacena el archivo se necesita para eliminar un archivo de un directorio. Con base en esto, parece que todos los usuarios pueden eliminar el archivo `/data/abc.txt`, ya que todo el mundo tiene el permiso `w` en el directorio.
+
+Sin embargo, para eliminar un archivo, también tienes que poder «entrar» al directorio. Puesto que sólo el usuario root tiene el permiso `x` en el directorio `/data`, sólo root puede «entrar» a ese directorio con el fin de eliminar los archivos de este directorio.
+
+**Lección aprendida:** El permiso `w` permite eliminar los archivos de un directorio, pero sólo si el usuario también tiene el permiso `x` en el directorio.
+
+#### 15.6.1.4 Escenario #4 - Acceso a los Contenidos de un Directorio
+
+**Pregunta:** ¿Puede el usuario `bob` ejecutar con éxito el siguiente comando: `more /data/abc.txt`?
+
+**Respuesta:** Verdadero
+
+**Explicación:** Como se mencionó anteriormente, para acceder a un archivo, el usuario debe tener acceso al directorio. El acceso al directorio sólo requiere el permiso `x`; aunque el permiso de `r` sería útil para listar los archivos en un directorio, no se necesita para «entrar» en el directorio y acceder a los archivos dentro del directorio.
+
+Cuando se ejecuta el comando `more /data/abc.txt`, se comprueban los siguientes permisos: el permiso `x` en el directorio `/`, el permiso `x` en el directorio `data` y el permiso `r` en el archivo `abc.txt`. Puesto que el usuario `bob` tiene todos estos permisos, el comando se ejecuta con éxito.
+
+**Lección aprendida:** El permiso `x` se necesita para «entrar» a un directorio, pero no se necesita el permiso `r` en el directorio, a menos que quieras listar el contenido del directorio.
+
+#### 15.6.1.5 Escenario #5 - La Complejidad de los Usuarios y Grupos
+
+**Pregunta:** ¿Puede el usuario `bob` ejecutar con éxito el siguiente comando: `more /data/abc.txt` (el directorio `/data` tiene un usuario y grupo propietarios diferentes a los ejemplos anteriores)?
+
+**Respuesta:** No hay suficiente información para determinarlo.
+
+**Explicación:** Para acceder al archivo `/data/abc.txt`, el usuario `bob` necesita permiso para «entrar» en el directorio `/data`. Esto requiere el permiso `x`, que `bob` puede tener o no, dependiendo de si es un miembro del grupo `payroll`.
+
+Si `bob` es un miembro del grupo `payroll`, entonces sus permisos en el directorio `/data` son `r-x` y el comando `more /data/abc.txt` se ejecutará con éxito (`bob` también necesita `x` en `/` y `r` en `abc.txt`, que ya tiene). Si no es un miembro del grupo `payroll`, sus permisos en el directorio `/data` son `---` y el comando fallaría.
+
+**Lección aprendida:** Debes tener en cuenta los permisos de cada archivo y directorio por separado y ser consciente a qué grupos pertenece la cuenta de usuario.
+
+#### 15.6.1.6 Escenario #6 - Prioridad de Permiso
+
+**Pregunta:** ¿Puede el usuario `bob` ejecutar con éxito el siguiente comando: `more /data/abc.txt` (el directorio `/data` tiene un usuario y grupo propietarios diferentes a los ejemplos anteriores)?
+
+**Respuesta:** Falso
+
+**Explicación:** Recuerda que si eres el propietario de un archivo, entonces sólo los permisos que son validados son los del usuario propietario. En este caso, sería `---` para `bob` en el archivo `/data/abc.txt`.
+
+En este caso, los miembros del grupo de `bob` y «otros» tienen más permisos sobre el archivo que los que tiene `bob`.
+
+**Lección aprendida:** No proporciones permisos para el grupo propietario y «otros» sin aplicar al menos el mismo nivel de acceso para el propietario del archivo.
+
+### 15.6.2 Usando el Comando chmod - Método Simbólico
+
+El comando `chmod` (**change mode**) se utiliza para cambiar los permisos de un archivo o directorio. Hay dos técnicas a la hora de utilizar este comando: **simbólico** y **numérico**. Ambas técnicas utilizan la siguiente sintaxis básica:
+
+```bash
+chmod new_permission file_name
+```
+
+**Importante:** Para cambiar los permisos de un archivo, necesitas ser el propietario del archivo o iniciar la sesión como el usuario root.
+
+Si quieres modificar algunos de los permisos actuales, el método simbólico probablemente será más fácil de usar. Con este método especificas qué permisos quieres cambiar en el archivo y los permisos de otros permanecen siendo como son.
+
+Cuando se especifica el nuevo permiso, comienzas por utilizar uno de los caracteres siguientes para indicar qué conjunto de permisos quieres cambiar:
+
+- `u` = cambiar los permisos del usuario propietario
+- `g` = cambiar los permisos del grupo propietario
+- `o` = cambiar los permisos de «otros»
+- `a` = aplicar los cambios a todos los conjuntos de permisos (usuario propietario, grupo propietario y «otros»)
+
+Debes especificar un `+` para agregar un permiso o un `-` para quitar un permiso. Por último, especifica `r` para lectura, `w` para escritura y `x` para ejecución.
+
+Por ejemplo, para conceder permiso de lectura al usuario propietario en un archivo denominado `abc.txt`, podrías utilizar el siguiente comando:
+
+```bash
+root@localhost:~# chmod u+r abc.txt
+```
+
+Solamente se cambió el permiso del usuario propietario. Todos los otros permisos permanecieron como estaban antes de la ejecución del comando `chmod`.
+
+Puedes combinar los valores para realizar múltiples cambios en los permisos del archivo. Por ejemplo, considera el siguiente comando que agregará permisos de lectura para el usuario propietario y grupo propietario mientras quita el permiso de escritura para «otros»:
+
+```bash
+root@localhost:~# chmod ug+r,o-w abc.txt
+```
+
+Por último, podrías utilizar el carácter `=` en lugar de `-` o `+` para especificar exactamente los permisos que quieres para un conjunto de permisos:
+
+```bash
+root@localhost:~# chmod u=r-x abc.txt
+```
+
+### 15.6.3 Usando el Comando chmod - Método Numérico
+
+El método numérico (también llamado el **método octal**) es útil cuando quieres cambiar muchos permisos en un archivo. Se basa en el sistema octal de numeración en el que a cada tipo de permiso se le asigna un valor numérico:
+
+| Valor | Permiso |
+|---|---|
+| 4 | read (leer) |
+| 2 | write (escribir) |
+| 1 | execute (ejecutar) |
+
+Usando una combinación de números del 0 al 7, cualquier combinación de permisos posible para leer, escribir y ejecutar se pueden especificar por un conjunto de permisos individuales. Por ejemplo:
+
+| Número | Permisos |
+|---|---|
+| 7 | `rwx` |
+| 6 | `rw-` |
+| 5 | `r-x` |
+| 4 | `r--` |
+| 3 | `-wx` |
+| 2 | `-w-` |
+| 1 | `--x` |
+| 0 | `---` |
+
+Cuando se utiliza el método numérico para cambiar los permisos, se deben especificar los nueve permisos. Debido a esto, el método simbólico es generalmente más fácil para cambiar unos pocos permisos, mientras que el método numérico es mejor para los cambios más drásticos.
+
+Por ejemplo, para establecer los permisos de un archivo llamado `abc.txt` a `rwxr-xr--` puedes utilizar el siguiente comando:
+
+```bash
+root@localhost:~]# chmod 754 abc.txt
+```
+
+<figure>
+<img src="diagrams/cap15-anatomia-permisos.svg" alt="Anatomía de los permisos -rwxr-xr--: tipo de archivo, permisos de propietario (rwx=7), grupo (r-x=5) y otros (r--=4), equivalentes al comando chmod 754">
+<figcaption>Anatomía de los permisos rwx y su equivalencia con el modo numérico (octal).</figcaption>
+</figure>
+
+## 15.7 Revisión del Comando stat
+
+Recordemos el comando `stat` mencionado anteriormente en este capítulo. Este comando proporciona información más detallada que el comando `ls -l`.
+
+Debido a esto, es posible considerar el uso del comando `stat` en lugar del comando `ls -l` durante la visualización de los permisos de un archivo. Una gran ventaja del comando `stat` es que muestra permisos tanto simbólicamente como por método numérico, como se demuestra a continuación:
+
+```bash
+sysadmin@localhost:~$ stat /tmp/filetest1
+  File: `/tmp/filetest1'
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: fd00h/64768d	Inode: 31477       Links: 1
+Access: (0664/-rw-rw-r--)  Uid: (  502/sysadmin)   Gid: (  503/sysadmin)
+Access: 2013-10-21 10:18:02.809118163 -0700
+Modify: 2013-10-21 10:18:02.809118163 -0700
+Change: 2013-10-21 10:18:02.809118163 -0700
+```
+
+## 15.8 umask
+
+El comando `umask` es una característica que se utiliza para determinar los permisos predeterminados establecidos al crear un archivo o directorio. Los permisos predeterminados se determinan cuando el valor de **umask** se resta de los permisos máximos predeterminados permisibles. Los permisos máximos por defecto son diferentes para los archivos y para los directorios:
+
+| Tipo | Permisos máximos por defecto |
+|---|---|
+| archivo | `rw-rw-rw-` |
+| directorio | `rwxrwxrwx` |
+
+Los permisos que se establecen inicialmente en un archivo cuando se crea no pueden exceder `rw-rw-rw-`. Para tener el permiso de ejecución para un archivo, primero tienes que crear el archivo y luego cambiar los permisos.
+
+El comando `umask` se puede utilizar para mostrar el valor umask actual:
+
+```bash
+sysadmin@localhost:~$ umask
+0002
+```
+
+Desglose de la salida:
+
+- El primer `0` indica que umask se da como un número octal.
+- El segundo `0` indica qué permisos hay que restar de los permisos por defecto de usuario propietario.
+- El tercer `0` indica qué permisos hay que restar de los permisos por defecto del grupo propietario.
+- El último número `2` indica qué permisos hay que restar de los permisos por defecto de otros.
+
+Ten en cuenta que los diferentes usuarios pueden tener diferentes umasks. Normalmente, el usuario root tendrá una umask más restrictiva que las cuentas de usuario:
+
+```bash
+root@localhost:~# umask
+0022
+```
+
+### 15.8.1 Cómo Funciona umask
+
+Para entender cómo funciona umask, supongamos que umask se establece en `027` y consideremos lo siguiente:
+
+| | Archivo | Directorio |
+|---|---|---|
+| Valor predeterminado | 666 | 777 |
+| Umask | -027 | -027 |
+| Resultado | 640 | 750 |
+
+La umask `027` significa que, por defecto, los archivos nuevos recibirían los permisos `640` o `rw-r-----` tal como se demuestra a continuación:
+
+```bash
+sysadmin@localhost:~$ umask 027
+sysadmin@localhost:~$ touch sample
+sysadmin@localhost:~$ ls -l sample
+-rw-r-----. 1 sysadmin sysadmin 0 Oct 28 20:14 sample
+```
+
+Debido a que los permisos predeterminados para los directorios son diferentes que para los archivos, una umask `027` daría lugar a diferentes permisos iniciales sobre los nuevos directorios. La umask `027` significa que, por defecto, los directorios nuevos recibirían los permisos `750` o `rwxr-x---` tal como se demuestra a continuación:
+
+```bash
+sysadmin@localhost:~$ umask 027
+sysadmin@localhost:~$ mkdir test-dir
+sysadmin@localhost:~$ ls -ld test-dir
+drwxr-x---. 1 sysadmin sysadmin 4096 Oct 28 20:25 test-dir
+```
+
+La nueva umask sólo se aplicará a un archivo y los directorios creados durante esa sesión. Cuando arranque un nuevo shell, la umask por defecto será efectiva de nuevo.
+
+Cambiar permanentemente la umask requiere la modificación del archivo `.bashrc` que se encuentra en el directorio home del usuario.
+
+### Resumen del capítulo
+
+- Todo archivo tiene un usuario propietario y un grupo propietario, asociados internamente por UID y GID (no por nombre); si el UID o GID deja de existir en `/etc/passwd` o `/etc/group`, el archivo aparece con el número en lugar del nombre.
+- Los comandos `id` y `groups` muestran la identidad y membresías de grupo del usuario; `newgrp` cambia temporalmente el grupo primario activo (abriendo un shell nuevo) para que los archivos creados pertenezcan a otro grupo.
+- `chgrp` cambia el grupo propietario de un archivo (con `-R` para operar recursivamente), mientras que `chown` puede cambiar el usuario propietario, el grupo propietario, o ambos a la vez (sólo root puede cambiar el usuario propietario).
+- La salida de `ls -l` muestra diez caracteres: tipo de archivo más los permisos `rwx` para usuario, grupo y otros; su significado varía entre archivos y directorios, y el acceso a un archivo depende también de los permisos de todos sus directorios padres.
+- `chmod` cambia permisos mediante el método simbólico (`u`, `g`, `o`, `a` con `+`, `-`, `=`) o el método numérico/octal (suma de 4=lectura, 2=escritura, 1=ejecución); el comando `stat` muestra los permisos en ambas notaciones junto con más metadatos que `ls -l`.
+- `umask` determina los permisos predeterminados de archivos y directorios nuevos, restando su valor de los máximos permitidos (666 para archivos, 777 para directorios); su cambio con el comando `umask` es temporal a la sesión, salvo que se modifique `.bashrc`.

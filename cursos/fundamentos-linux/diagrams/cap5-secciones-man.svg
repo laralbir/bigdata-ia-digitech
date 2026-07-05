@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 370" font-family="Helvetica Neue, Arial, sans-serif">
+  <title>Secciones numeradas del manual de Linux (man)</title>
+  <rect width="680" height="370" fill="#ffffff"/>
+  <text x="340" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Secciones numeradas del manual de Linux (man N comando)</text>
+
+  <!-- row template: circle + section name + example -->
+  <g>
+    <circle cx="45" cy="55" r="15" fill="#1a4d8b"/>
+    <text x="45" y="60" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">1</text>
+    <text x="72" y="51" font-size="13" fill="#1a4d8b" font-weight="bold">Comandos de usuario</text>
+    <text x="72" y="66" font-size="11.5" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">man 1 ls, man 1 grep</text>
+  </g>
+  <g>
+    <circle cx="45" cy="93" r="15" fill="#1a4d8b"/>
+    <text x="45" y="98" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">2</text>
+    <text x="72" y="89" font-size="13" fill="#1a4d8b" font-weight="bold">Llamadas al sistema</text>
+    <text x="72" y="104" font-size="11.5" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">man 2 open, man 2 read</text>
+  </g>
+  <g>
+    <circle cx="45" cy="131" r="15" fill="#1a4d8b"/>
+    <text x="45" y="136" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">3</text>
+    <text x="72" y="127" font-size="13" fill="#1a4d8b" font-weight="bold">Funciones de biblioteca de C</text>
+    <text x="72" y="142" font-size="11.5" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">man 3 printf</text>
+  </g>
+  <g>
+    <circle cx="45" cy="169" r="15" fill="#1a4d8b"/>
+    <text x="45" y="174" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">4</text>
+    <text x="72" y="165" font-size="13" fill="#1a4d8b" font-weight="bold">Dispositivos especiales</text>
+    <text x="72" y="180" font-size="11.5" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">man 4 sda</text>
+  </g>
+  <g>
+    <circle cx="45" cy="207" r="15" fill="#1a4d8b"/>
+    <text x="45" y="212" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">5</text>
+    <text x="72" y="203" font-size="13" fill="#1a4d8b" font-weight="bold">Formatos de archivo</text>
+    <text x="72" y="218" font-size="11.5" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">man 5 passwd</text>
+  </g>
+  <g>
+    <circle cx="45" cy="245" r="15" fill="#1a4d8b"/>
+    <text x="45" y="250" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">6</text>
+    <text x="72" y="241" font-size="13" fill="#1a4d8b" font-weight="bold">Juegos</text>
+  </g>
+  <g>
+    <circle cx="45" cy="283" r="15" fill="#1a4d8b"/>
+    <text x="45" y="288" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">7</text>
+    <text x="72" y="279" font-size="13" fill="#1a4d8b" font-weight="bold">Miscelánea</text>
+    <text x="72" y="294" font-size="11.5" fill="#666666">macros, convenciones, protocolos</text>
+  </g>
+  <g>
+    <circle cx="45" cy="321" r="15" fill="#1a4d8b"/>
+    <text x="45" y="326" text-anchor="middle" font-size="13" fill="#ffffff" font-weight="bold">8</text>
+    <text x="72" y="317" font-size="13" fill="#1a4d8b" font-weight="bold">Comandos de administración</text>
+    <text x="72" y="332" font-size="11.5" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">man 8 mount, man 8 useradd</text>
+  </g>
+
+  <text x="340" y="358" text-anchor="middle" font-size="10.5" font-style="italic" fill="#666666">Cuando existe el mismo nombre en varias secciones (ej. passwd), indica el número para desambiguar: man 5 passwd</text>
+</svg>

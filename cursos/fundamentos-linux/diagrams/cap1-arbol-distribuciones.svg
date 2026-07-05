@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" font-family="Helvetica Neue, Arial, sans-serif">
+  <title>Árbol genealógico simplificado de las distribuciones Linux</title>
+  <defs>
+    <marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a6a7a"/>
+    </marker>
+  </defs>
+  <rect width="760" height="400" fill="#ffffff"/>
+  <text x="380" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Árbol genealógico simplificado de las distribuciones Linux</text>
+
+  <!-- connecting lines -->
+  <line x1="380" y1="75" x2="380" y2="105" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="380" y1="145" x2="140" y2="182" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="380" y1="145" x2="380" y2="182" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="380" y1="145" x2="620" y2="182" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="140" y1="218" x2="140" y2="252" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="380" y1="218" x2="300" y2="252" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="380" y1="218" x2="460" y2="252" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="620" y1="218" x2="620" y2="252" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="140" y1="288" x2="140" y2="322" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+  <line x1="460" y1="288" x2="460" y2="322" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow1)"/>
+
+  <!-- L0: UNIX -->
+  <rect x="270" y="35" width="220" height="40" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="380" y="60" text-anchor="middle" font-size="13" fill="#1a4d8b">UNIX (AT&amp;T, década de 1970)</text>
+
+  <!-- L1: Linux kernel -->
+  <rect x="250" y="105" width="260" height="40" rx="8" fill="#1a4d8b" stroke="#123a68" stroke-width="1.5"/>
+  <text x="380" y="130" text-anchor="middle" font-size="13" fill="#ffffff">Linux (kernel, 1991) + herramientas GNU</text>
+
+  <!-- L2 family roots -->
+  <rect x="80" y="182" width="120" height="36" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="140" y="205" text-anchor="middle" font-size="13" fill="#1a4d8b">Debian</text>
+
+  <rect x="320" y="182" width="120" height="36" rx="8" fill="#fbeaea" stroke="#8b1a1a" stroke-width="1.5"/>
+  <text x="380" y="205" text-anchor="middle" font-size="13" fill="#8b1a1a">Red Hat</text>
+
+  <rect x="560" y="182" width="120" height="36" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="620" y="205" text-anchor="middle" font-size="13" fill="#2e7d32">SUSE</text>
+
+  <!-- L3 -->
+  <rect x="80" y="252" width="120" height="36" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="140" y="275" text-anchor="middle" font-size="13" fill="#1a4d8b">Ubuntu</text>
+
+  <rect x="245" y="252" width="110" height="36" rx="8" fill="#fbeaea" stroke="#8b1a1a" stroke-width="1.5"/>
+  <text x="300" y="275" text-anchor="middle" font-size="13" fill="#8b1a1a">Fedora</text>
+
+  <rect x="405" y="252" width="110" height="36" rx="8" fill="#fbeaea" stroke="#8b1a1a" stroke-width="1.5"/>
+  <text x="460" y="275" text-anchor="middle" font-size="13" fill="#8b1a1a">RHEL</text>
+
+  <rect x="560" y="252" width="120" height="36" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="620" y="275" text-anchor="middle" font-size="13" fill="#2e7d32">openSUSE</text>
+
+  <!-- L4 -->
+  <rect x="80" y="322" width="120" height="36" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="140" y="345" text-anchor="middle" font-size="13" fill="#1a4d8b">Linux Mint</text>
+
+  <rect x="400" y="322" width="120" height="36" rx="8" fill="#fbeaea" stroke="#8b1a1a" stroke-width="1.5"/>
+  <text x="460" y="345" text-anchor="middle" font-size="13" fill="#8b1a1a">CentOS</text>
+
+  <text x="380" y="390" text-anchor="middle" font-size="10.5" font-style="italic" fill="#666666">Relaciones simplificadas con fines didácticos; existen cientos de distribuciones adicionales.</text>
+</svg>

@@ -1,0 +1,595 @@
+# Capítulo 5: Obtener Ayuda en Linux: man, info y otras fuentes
+
+## 5.1 Introducción
+
+Si le preguntas a los usuarios qué característica del sistema operativo Linux disfrutan más, muchos responderán «el poder proporcionado por el entorno de la línea de comandos». Esto es porque hay literalmente miles de comandos disponibles con muchas opciones, resultando en herramientas poderosas.
+
+Sin embargo, con este poder viene la complejidad. La complejidad, a su vez, puede crear confusión. Como resultado, saber encontrar ayuda cuando trabajas en Linux es una **habilidad esencial** para cualquier usuario. Referirte a la ayuda te permite recordar cómo funciona un comando, además de ser un recurso de información al aprender nuevos comandos.
+
+93% de los directores de recursos humanos planea contratar a un profesional de Linux en los próximos seis meses. Y casi 90% mencionó que es difícil encontrar profesionales experimentados en Linux. Esto significa muchas oportunidades de trabajo para aquellos con habilidades de Linux.
+
+## 5.2 Las Páginas man
+
+Como se mencionó anteriormente, **UNIX** era el sistema operativo desde el cual se construyó la base de Linux. Los desarrolladores de UNIX crearon los documentos de ayuda llamados **páginas man** (man significa manual).
+
+Las páginas man se utilizan para describir las características de los comandos. Te proporcionarán una descripción básica de la finalidad del comando, así como los detalles de las opciones del comando.
+
+### 5.2.1 Visualizando las Páginas de Comando Man
+
+Para ver una página man de un comando, ejecuta el comando `man comando` en la ventana del terminal. Por ejemplo, el comando `man cal` mostrará la página man para el comando `cal`:
+
+```
+CAL(1)                    BSD General Commands Manual             CAL(1)
+
+NAME
+cal, ncal -- displays a calendar and the date of Easter
+
+SYNOPSIS
+cal [-3hjy] [-A number] [-B number] [[month] year]
+cal [-3hj] [-A number] [-B number] -m month [year]
+ncal [-3bhjJpwySM] [-A number] [-B number] [-s country_code] [[month]
+year]
+ ncal [-3bhJeoSM] [-A number] [-B number] [year]
+ ncal [-CN] [-H yyyy-mm-dd] [-d yyyy-mm]
+
+DESCRIPTION
+    The cal utility displays a simple calendar in traditional format and    ncal offers an alternative layout, more options and the date of         Easter. The new format is a little cramped but it makes a year fit      on a 25x80 terminal.  If arguments are not specified, the current       month is displayed.
+
+         The options are as follows:
+ -h      Turns off highlighting of today.
+
+ Manual page cal(1) line 1 (press h for help or q to quit)
+```
+
+### 5.2.2 Controlar la Visualización de la Página man
+
+El comando `man` utiliza un **«localizador»** para mostrar documentos. Este localizador es normalmente el comando `less`, pero en algunas distribuciones puede ser el comando `more`. Ambos son muy similares en cómo se ejecutan y los trataremos en más detalle en un capítulo posterior.
+
+Si quieres ver los diferentes comandos de movimiento que están disponibles, puedes introducir la letra `h` mientras visualizas una página man. Esto mostrará una página de ayuda:
+
+> **Nota:** Si estás trabajando en una distribución Linux que utiliza el comando `more` como un localizador, su salida será diferente que el ejemplo que se muestra aquí.
+
+```
+ SUMMARY OF LESS COMMANDS
+
+    Commands marked with * may be preceded by a number, N.
+    Notes in parentheses indicate the behavior if N is given.
+    A key preceded by a caret indicates the Ctrl key; thus ^K is ctrl-K.
+
+  h  H                 Display this help.
+  q  :q  Q  :Q  ZZ     Exit.
+ -----------------------------------------------------------------------
+
+                         MOVING
+
+e  ^E  j  ^N  CR  *  Forward  one line   (or N lines).
+y  ^Y  k  ^K  ^P  *  Backward one line   (or N lines).
+f  ^F  ^V  SPACE  *  Forward  one window (or N lines).
+b  ^B  ESC-v      *  Backward one window (or N lines).
+z                 *  Forward  one window (and set window to N).
+w                 *  Backward one window (and set window to N).
+ESC-SPACE         *  Forward  one window, but don't stop at end-of-file.
+d  ^D             *  Forward  one half-window (and set half-window to N)
+u  ^U             *  Backward one half-window (and set half-window to N)
+ESC-)  RightArrow *  Left  one half screen width (or N positions).
+HELP -- Press RETURN for more, or q when done
+```
+
+Si tu distribución usa el comando `less`, podría estar un poco abrumado por la gran cantidad de «comandos» que están disponibles. La tabla siguiente proporciona un resumen de los comandos más útiles:
+
+| Comando | Función |
+|---|---|
+| `Return` (o Intro) | Bajar una línea |
+| `Space` (o Espacio) | Bajar una página |
+| `/término` | Buscar un término |
+| `n` | Buscar el siguiente elemento de la búsqueda |
+| `1G` | Ir a inicio |
+| `G` | Ir al final |
+| `h` | Mostrar ayuda |
+| `q` | Cerrar página man |
+
+### 5.2.3 Las Secciones de la Página man
+
+Las páginas man se dividen en **secciones**. Cada sección está diseñada para proporcionar información específica acerca de un comando. Si bien hay secciones comunes que verás en la mayoría de las páginas man, algunos desarrolladores también crean secciones que sólo verás en una página man específica.
+
+La siguiente tabla describe algunas de las secciones más comunes que encontrarás en las páginas del comando man:
+
+| Nombre de la Sección | Propósito |
+|---|---|
+| `NAME` (Nombre) | Proporciona el nombre del comando y una breve descripción. |
+| `SYNOPSIS` (Sinopsis) | Proporciona ejemplos de cómo se ejecuta el comando. |
+| `DESCRIPTION` (Descripción) | Proporciona una descripción más detallada del comando. |
+| `OPTIONS` (Opciones) | Muestra las opciones para el comando, así como una descripción de cómo se utilizan. A menudo esta información se encontrará en la sección `DESCRIPTION` y no en una sección separada de `OPTIONS`. |
+| `FILES` (Archivos) | Muestra los archivos que pueden utilizarse para configurar las características más avanzadas del comando. A menudo esta información se encontrará en la sección de `DESCRIPTION` y no en una sección separada. |
+| `AUTHOR` (Autor) | El nombre de la persona que creó la página man y (a veces) la manera de contactarla. |
+| `REPORTING BUGS` (Reportando Errores) | Proporciona información sobre cómo reportar problemas con el comando. |
+| `COPYRIGHT` (Derechos de Autor) | Proporciona información básica de los derechos de autor. |
+| `SEE ALSO` (Ver También) | Proporciona una idea de dónde puedes encontrar información adicional; suele incluir otros comandos relacionados. |
+
+Ejemplos de cada sección tal como aparecen en la página man de `ls`:
+
+```
+NAME
+       ls - list directory contents
+
+SYNOPSIS
+       ls [OPTION]... [FILE]...
+
+DESCRIPTION
+       List  information  about  the FILEs (the current directory by default).
+       Sort entries alphabetically if none of -cftuvSUX nor --sort  is  speci-
+       fied.
+
+       -a, --all
+              do not ignore entries starting with .
+
+       -A, --almost-all
+              do not list implied . and ..
+
+       --author
+              with -l, print the author of each file
+
+       -b, --escape
+              print C-style escapes for nongraphic characters
+
+       --block-size=SIZE
+              scale sizes by SIZE before printing them; e.g., '--block-size=M'
+              prints sizes in units of 1,048,576 bytes; see SIZE format below
+
+AUTHOR
+       Written by Richard M. Stallman and David MacKenzie.
+
+REPORTING BUGS
+       GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+       Report ls translation bugs to <http://translationproject.org/team/>
+
+COPYRIGHT
+       Copyright (C) 2017 Free Software Foundation, Inc.  License GPLv3+:  GNU
+       GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+       This  is  free  software:  you  are free to change and redistribute it.
+       There is NO WARRANTY, to the extent permitted by law.
+
+SEE ALSO
+       Full documentation at: <http://www.gnu.org/software/coreutils/ls>
+       or available locally via: info '(coreutils) ls invocation'
+```
+
+### 5.2.4 La sección SYNOPSIS de la Página man
+
+La sección de `SYNOPSIS` (o «SINOPSIS» en español) de una página man puede ser difícil de entender, pero es muy importante porque proporciona un ejemplo conciso de cómo utilizar el comando. Por ejemplo, considera la `SYNOPSIS` de la página man para el comando `cal`:
+
+```
+SYNOPSIS
+     cal [-3hjy] [-A number] [-B number] [[[day] month] year]
+```
+
+Los **corchetes** `[ ]` se utilizan para indicar que esta característica no es necesaria para ejecutar el comando. Por ejemplo, `[-3hjy]` significa que puedes usar las opciones `-h`, `-j`, `-y`, `1` o `3`, pero ninguna de estas opciones son necesarias para el correcto funcionamiento del comando `cal`.
+
+El segundo conjunto de corchetes en la `SYNOPSIS` del comando `cal` (`[[[day] month] year]`) muestra otra característica. Esto significa que puedes especificar un año por sí mismo, pero si se especifica un mes también se debe especificar un año. Además, si especificas un día entonces también necesitarás especificar un mes y un año.
+
+Otro componente de `SYNOPSIS` que puede causar cierta confusión puede verse en la `SYNOPSIS` del comando `date`:
+
+```
+SYNOPSIS
+       date [OPTION]... [+FORMAT]
+       date [-u|--utc|--universal] [MMDDhhmm[[CC]YY][.ss]]
+```
+
+En esta `SYNOPSIS` hay dos sintaxis para el comando `date`. La primera de ellas se utiliza para mostrar la fecha en el sistema mientras que la segunda se utiliza para fijar la fecha.
+
+Las **elipses** siguientes a `[OPTION]`, `...`, indican que uno o más ítems antes de la opción pueden usarse.
+
+Además, la notación `[-u|--utc|--universal]` significa que puedes utilizar la opción `-u`, la opción `--utc` o la opción `--universal`. Normalmente esto significa que las tres opciones hacen lo mismo, pero a veces este formato (uso del carácter `|`) sirve para indicar que no se utilicen las opciones combinadas, tal como un operador lógico «o».
+
+### 5.2.5 Buscando dentro de la Página man
+
+Para buscar un término en la página man, pulsa `/` e introduce el término seguido por la tecla Entrar. El programa buscará desde la ubicación actual hacia el final de la página para tratar de localizar y resaltar el término.
+
+Si el término no se encuentra, o has llegado al final de las coincidencias, el programa reportará `Pattern not found (press Return)` (o «Patrón no encontrado (presiona Regresar)» en español). Si se encuentra una coincidencia y quieres pasar al siguiente término, pulsa `n`. Para volver al término anterior pulsa `N`.
+
+<figure>
+<img src="diagrams/cap5-secciones-man.svg" alt="Las 8 secciones numeradas del manual de Linux: 1 comandos de usuario, 2 llamadas al sistema, 3 funciones de biblioteca de C, 4 dispositivos especiales, 5 formatos de archivo, 6 juegos, 7 miscelánea, 8 comandos de administración">
+<figcaption>Las 8 secciones numeradas del manual de Linux (man).</figcaption>
+</figure>
+
+### 5.2.6 Las Páginas man Categorizadas por Secciones
+
+Hasta ahora, hemos estado visualizando las páginas man de comandos. Sin embargo, a veces los **archivos de configuración** (a veces llamados archivos de sistema) también tienen sus páginas man. Estos archivos contienen datos que se utilizan para almacenar información sobre el sistema operativo o servicios.
+
+Adicionalmente, existen varios tipos de comandos (comandos de usuario, comandos del sistema y comandos de administración), así como otras funciones que requieren documentación, como las librerías y los componentes del **kernel**.
+
+Como resultado, hay miles de páginas man en una distribución típica de Linux. Para organizar todas estas páginas, las páginas se clasifican por secciones, al igual que cada página man se divide en secciones.
+
+Por defecto, hay nueve secciones de las páginas man:
+
+1. Programas ejecutables o comandos del shell
+2. Llamadas del sistema (funciones proporcionadas por el kernel)
+3. Llamadas de la librería (funciones dentro de las librerías de los programas)
+4. Archivos especiales (generalmente se encuentran en `/dev`)
+5. Formatos de archivo y convenciones, por ejemplo `/etc/passwd`
+6. Juegos
+7. Otros (incluyendo paquetes macro y convenciones), por ejemplo, `man(7)`, `groff(7)`
+8. Comandos de administración de sistema (generalmente sólo para el root)
+9. Rutinas del kernel [No estándar]
+
+Cuando utilizas el comando `man`, éste busca cada una de estas secciones por orden hasta que encuentra el primer «match» (o «coincidencia» en español). Por ejemplo, si ejecutas el comando `man cal`, en la primera sección (programas ejecutables o comandos del shell) se buscará la página man llamada `cal`. Si no lo encuentra, entonces se busca en la segunda sección. Si no se encuentra ninguna página man tras buscar en todas las secciones, recibirás un mensaje de error:
+
+```bash
+sysadmin@localhost:~$ man zed
+No manual entry for zed
+sysadmin@localhost:~$
+```
+
+#### 5.2.6.1 Determinar la Sección
+
+Para determinar a qué sección pertenece una página man específica tienes que ver el valor numérico de la primera línea de la salida de la página man. Por ejemplo, si ejecutas el comando `man cal`, verás que el comando `cal` pertenece a la primera sección de las páginas man:
+
+```
+CAL(1)                    BSD General Commands Manual             CAL(1)
+```
+
+#### 5.2.6.2 Especificar una Sección
+
+En algunos casos, necesitarás especificar la sección para visualizar la página man correcta. Esto es necesario porque a veces habrá páginas man con el mismo nombre en diferentes secciones.
+
+Por ejemplo, hay un comando llamado `passwd` que permite cambiar tu contraseña. También hay un archivo llamado `passwd` que almacena la información de la cuenta. Ambos, el comando y el archivo, tienen una página man.
+
+El comando `passwd` es un comando de «user» (o «usuario» en español), por lo que el comando `man passwd` mostrará la página man para el comando `passwd` por defecto:
+
+```
+PASSWD(1)                        User Commands                 PASSWD(1)
+```
+
+Para especificar una sección diferente, proporciona el número de la sección como el primer argumento del comando `man`. Por ejemplo, el comando `man 5 passwd` buscará la página man de `passwd` sólo en la sección 5:
+
+```
+PASSWD(5)                File Formats and Conversions          PASSWD(5)
+```
+
+#### 5.2.6.3 Buscar las Secciones
+
+A veces no es claro en qué sección se almacena una página man. En estos casos, puedes buscar una página man por nombre.
+
+La opción `-f` para el comando `man` mostrará páginas que coinciden, o parcialmente coinciden, con un nombre específico y provee una breve descripción de cada página man:
+
+```bash
+sysadmin@localhost:~$ man -f passwd
+passwd (5)           - the password file
+passwd (1)           - change user password
+passwd (1ssl)        - compute password hashes
+sysadmin@localhost:~$
+```
+
+Ten en cuenta que en la mayoría de las distribuciones de Linux, el comando `whatis` hace lo mismo que el comando `man -f`. En esas distribuciones, ambos comandos producen la misma salida.
+
+### 5.2.7 Buscar Páginas man por una Palabra Clave
+
+Desafortunadamente, no siempre te acordarás del nombre exacto de la página man que quieres ver. En estos casos puedes buscar páginas man que coincidan con una palabra clave mediante el uso de la opción `-k` del comando `man`.
+
+Por ejemplo, ¿qué pasa si quieres ver una página que muestra cómo cambiar la contraseña, pero no recuerdas el nombre exacto? Puedes ejecutar el comando `man -k password`:
+
+```bash
+sysadmin@localhost:~$ man -k passwd
+chgpasswd (8)        - update group passwords in batch mode
+chpasswd (8)         - update passwords in batch mode
+fgetpwent_r (3)      - get passwd file entry reentrantly
+getpwent_r (3)       - get passwd file entry reentrantly
+gpasswd (1)          - administer /etc/group and /etc/gshadow
+pam_localuser (8)    - require users to be listed in /etc/passwd
+passwd (1)           - change user password
+passwd (1ssl)        - compute password hashes
+passwd (5)           - the password file
+passwd2des (3)       - RFS password encryption
+update-passwd (8)    - safely update /etc/passwd, /etc/shadow and /etc/group
+sysadmin@localhost:~$
+```
+
+Al utilizar esta opción puedes recibir una gran cantidad de salidas. El comando anterior, por ejemplo, dió salida a 60 resultados.
+
+Recuerda que hay miles de páginas man, así que cuando buscas por una palabra clave, sé tan específico como sea posible. Usando una palabra genérica, como «the» (o «el/la» en español), podría resultar en cientos o incluso miles de resultados.
+
+Ten en cuenta que en la mayoría de las distribuciones de Linux, el comando `apropos` hace lo mismo que el comando `man -k`. En esas distribuciones, ambas producen la misma salida.
+
+## 5.3 Comando info
+
+Las páginas man son unas fuentes extensas de información, pero suelen tener algunas desventajas. Un ejemplo de una desventaja es que cada página man es un documento independiente y no está relacionado con ninguna otra página man. Aunque algunas páginas man tienen una sección `SEE ALSO` (o «Ver También» en español) que puede hacer referencia a otras páginas man, en realidad tienden a ser relacionadas con las fuentes de documentación.
+
+El comando `info` también proporciona documentación sobre funciones y comandos del sistema operativo. El objetivo de este comando es ligeramente diferente de las páginas man: proporcionar un recurso de documentación que proporciona una estructura lógica, facilitando la lectura de la documentación.
+
+En los documentos info la información se desglosa en categorías que funcionan de una manera parecida a como funciona una tabla de contenido en un libro. Se proporcionan hipervínculos hacia páginas con la información sobre los temas individuales para un comando específico o función. De hecho, toda la documentación se combina en un solo «book» (o «libro» en español) en el que puedes ir a un nivel superior de la documentación y ver la tabla de contenido que representa toda la documentación disponible.
+
+Otra ventaja del comando `info` sobre las páginas man es que el estilo de escritura de los documentos info es típicamente más propicio para aprender un tema. Considera que las páginas man son un recurso de referencia y los documentos info sirven más como una guía de aprendizaje.
+
+### 5.3.1 Visualizar la Documentación Info para un Comando
+
+Para visualizar la documentación info de un comando, ejecuta el comando `info comando` (reemplaza `comando` con el nombre del comando sobre el cual buscas la información). Por ejemplo, la siguiente pantalla muestra la salida del comando `info ls`:
+
+```
+File: coreutils.info,  Node: ls invocation,  Next: dir invocation,  Up: Directo\ry listing
+
+10.1 `ls': List directory contents
+==================================
+
+    The `ls' program lists information about files (of any type, including directories).  Options and file arguments can be intermixed arbitrarily, as usual.
+
+    For non-option command-line arguments that are directories, by
+default `ls' lists the contents of directories, not recursively, and
+omitting files with names beginning with `.'.  For other non-option
+arguments, by default `ls' lists just the file name.  If no non-option
+argument is specified, `ls' operates on the current directory, acting
+as if it had been invoked with a single argument of `.'.
+
+    By default, the output is sorted alphabetically, according to the
+locale settings in effect.(1) If standard output is a terminal, the
+output is in columns (sorted vertically) and control characters are
+output as question marks; otherwise, the output is listed one per line
+and control characters are output as-is.
+--zz-Info: (coreutils.info.gz)ls invocation, 58 lines --Top-------------
+Welcome to Info version 5.2. Type h for help, m for menu item.
+```
+
+Observa que la primera línea proporciona información que te indica dónde dentro de la documentación info estás ubicado. Esta documentación se divide en **nodes** (o «nodos» en español) y en el ejemplo anterior estás actualmente en el nodo `ls invocation`. Si pasaras al siguiente nodo (tal como ir al siguiente capítulo en un libro), estarías en el nodo `dir invocation`. Si te pasaras un nivel hacia arriba estarías en el nodo `Directory listing`.
+
+### 5.3.2 Cambiando de Posición mientras se Visualiza un Documento info
+
+Igual que el comando `man`, puedes obtener un listado de comandos de movimiento escribiendo la letra `h` al leer la documentación info:
+
+```
+Basic Info command keys
+l           Close this help window.
+q           Quit Info altogether.
+H           Invoke the Info tutorial.
+Up          Move up one line.
+Down        Move down one line.
+DEL         Scroll backward one screenful.
+SPC         Scroll forward one screenful.
+Home        Go to the beginning of this node.
+End         Go to the end of this node.
+TAB         Skip to the next hypertext link.
+RET         Follow the hypertext link under the cursor.
+l           Go back to the last node seen in this window.
+[           Go to the previous node in the document.
+]           Go to the next node in the document.
+p           Go to the previous node on this level.
+n           Go to the next node on this level.
+u           Go up one level.
+-----Info: *Info Help*, 466 lines --Top---------------------------------
+```
+
+Ten en cuenta que si quieres cerrar la pantalla de ayuda, debes introducir la letra `l`. Esto te regresa a tu documento y te permite continuar leyendo. Para salir completamente, introduce la letra `q`.
+
+La tabla siguiente proporciona un resumen de los comandos útiles:
+
+| Comando | Función |
+|---|---|
+| Flecha abajo ↓ | Bajar una línea |
+| Espacio | Bajar una página |
+| `s` | Buscar un término |
+| `[` | Ir al nodo anterior |
+| `]` | Ir al siguiente nodo |
+| `u` | Subir un nivel |
+| TABULADOR | Saltar al siguiente hipervínculo |
+| INICIO | Ir a inicio |
+| FIN | Ir al final |
+| `h` | Mostrar ayuda |
+| `L` | Cerrar la página de ayuda |
+| `q` | Cerrar el comando info |
+
+Si te desplazas en el documento, verás el menú para el comando `ls`:
+
+```
+* Menu:
+
+* Which files are listed::
+* What information is listed::
+* Sorting the output::
+* Details about version sort::
+* General output formatting::
+* Formatting file timestamps::
+* Formatting the file names::
+
+   ---------- Footnotes ----------
+
+ (1) If you use a non-POSIX locale (e.g., by setting `LC_ALL' to
+`en_US'), then `ls' may produce output that is sorted differently than
+you're accustomed to.  In that case, set the `LC_ALL' environment
+variable to `C'.
+--zz-Info: (coreutils.info.gz)ls invocation, 58 lines --Top-------------
+```
+
+Los elementos bajo el menú son hipervínculos que pueden llevarte a los nodos que describen más del comando `ls`. Por ejemplo, si colocas tu cursor en la línea «* Sorting the output::» (o «clasificando la salida» en español) y presionas la tecla Entrar, pasarás al nodo que describe la clasificación de la salida del comando `ls`:
+
+```
+File: coreutils.info,  Node: Sorting the output,  Next: Details about version s\ort,  Prev: What information is listed,  Up: ls invocation
+10.1.3 Sorting the output
+-------------------------
+These options change the order in which `ls' sorts the information it
+outputs.  By default, sorting is done by character code (e.g., ASCII
+order).
+
+`-c'
+`--time=ctime'
+`--time=status'
+     If the long listing format (e.g., `-l', `-o') is being used, print
+     the status change time (the `ctime' in the inode) instead of the
+     modification time.  When explicitly sorting by time (`--sort=time'
+     or `-t') or when not using a long listing format, sort according
+     to the status change time.
+
+`-f'
+     Primarily, like `-U'--do not sort; list the files in whatever
+     order they are stored in the directory.  But also enable `-a' (lis
+--zz-Info: (coreutils.info.gz)Sorting the output, 68 lines --Top--------
+```
+
+Ten en cuenta que entrando al nodo de clasificación, prácticamente entras a un subnodo del nodo del que originalmente partiste. Para regresar a tu nodo anterior, puedes utilizar la tecla `u`. Mientras que `u` te llevará un nivel arriba hasta el inicio del nodo, también puedes utilizar la tecla `l` para volver exactamente a la ubicación anterior en la que te encontrabas antes de entrar al nodo de clasificación.
+
+### 5.3.3 Explorar la Documentación info
+
+En lugar de utilizar la documentación info para buscar la información sobre un comando específico o función, puedes considerar la posibilidad de explorar las capacidades de Linux mediante la lectura a través de la documentación info. Si ejecutas el comando `info` sin ningún argumento, pasarás a un nivel superior de la documentación. Desde allí puedes explorar muchas características:
+
+```
+File: dir,      Node: Top       This is the top of the INFO tree
+  This (the Directory node) gives a menu of major topics.
+  Typing "q" exits, "?" lists all Info commands, "d" returns here,
+  "h" gives a primer for first-timers,
+  "mEmacslt<Return>" visits the Emacs manual, etc.
+  In Emacs, you can click mouse button 2 on a menu item or cross referen  ce to select it.
+* Menu:
+
+Basics
+* Common options: (coreutils)Common options.
+* Coreutils: (coreutils).       Core GNU (file, text, shell) utilities.
+* Date input formats: (coreutils)Date input formats.
+* File permissions: (coreutils)File permissions.
+                           Access modes.
+* Finding files: (find).   Operating on files matching certain criteria.
+
+C++ libraries
+* autosprintf: (autosprintf).  Support for printf format strings in C+
+-----Info: (dir)Top, 211 lines --Top------------------------------------
+Welcome to Info version 5.2. Type h for help, m for menu item.
+```
+
+## 5.4 Otras Fuentes de Ayuda
+
+En muchos casos verás que las páginas man o documentación info te proporcionarán las respuestas que necesitas. Sin embargo, en algunos casos, puede que necesites buscar en otras ubicaciones.
+
+### 5.4.1 Utilizar la opción --help
+
+Muchos comandos te proporcionan información básica, muy similar a la sección `SYNOPSIS` que aparece en las páginas man, al aplicar la opción `--help` (o «ayuda» en español) al comando. Esto es útil para aprender el uso básico de un comando:
+
+```bash
+sysadmin@localhost:~$  ps --help
+********* simple selection *********  ********* selection by list *********
+-A all processes                      -C by command name
+-N negate selection                   -G by real group ID (supports names)
+-a all w/ tty except session leaders  -U by real user ID (supports names)
+-d all except session leaders         -g by session OR by effective group name
+-e all processes                      -p by process ID
+T  all processes on this terminal     -s processes in the sessions given
+a  all w/ tty, including other users  -t by tty
+g  OBSOLETE -- DO NOT USE             -u by effective user ID (supports names)
+r  only running processes             U  processes for specified users
+x  processes w/o controlling ttys     t  by tty
+*********** output format **********  *********** long options ***********
+-o,o user-defined  -f full            --Group --User --pid --cols --ppid
+-j,j job control   s  signal          --group --user --sid --rows --info
+-O,O preloaded -o  v  virtual memory  --cumulative --format --deselect
+-l,l long          u  user-oriented   --sort --tty --forest --version
+-F   extra full    X  registers       --heading --no-headi
+                    ********* misc options *********
+-V,V  show version      L  list format codes  f  ASCII art forest
+-m,m,-L,-T,H  threads   S  children in sum    -y change -l format
+-M,Z  security data     c  true command name  -c scheduling class
+-w,w  wide output       n  numeric WCHAN,UID  -H process hierarchy
+sysadmin@localhost:~$
+```
+
+### 5.4.2 Documentación Adicional del Sistema
+
+En la mayoría de los sistemas, existe un directorio donde se encuentra la documentación adicional. A menudo se trata de una ubicación donde los proveedores que crean software adicional (de terceros) almacenan sus archivos de documentación.
+
+Por lo general, se trata de una ubicación donde los administradores del sistema irán a aprender cómo configurar servicios de software más complejos. Sin embargo, los usuarios regulares a veces también encuentran esta documentación útil.
+
+Estos archivos de documentación se suelen llamar archivos **«readme»** (o «léeme» en español), ya que los archivos tienen nombres como `README` o `readme.txt`. La ubicación de estos archivos puede variar según la distribución que estés utilizando. Ubicaciones típicas incluyen `/usr/share/doc` y `/usr/doc`.
+
+## 5.5 Búsqueda de los Comandos y la Documentación
+
+Recuerda que el comando `whatis` (o `man -f`) te dirá en qué sección se almacena la página man. Si utilizas este comando con suficiente frecuencia, probablemente te topes con una salida inusual, como la siguiente:
+
+```bash
+sysadmin@localhost:~$ whatis ls
+ls (1)               - list directory contents
+ls (lp)              - list directory contents
+sysadmin@localhost:~$
+```
+
+Según esta salida, hay dos comandos que listan el contenido del directorio. La respuesta simple a la pregunta de por qué hay dos comandos `ls` es que UNIX tuvo dos variantes principales, lo que dio lugar a que algunos comandos fueran desarrollados «en paralelo». Por lo tanto, algunos comandos se comportan diferentemente en diversas variantes de UNIX. Muchas distribuciones modernas de Linux incluyen comandos de ambas variantes de UNIX.
+
+Esto, sin embargo, conlleva un pequeño problema: cuando corres el comando `ls`, ¿cuál de los comandos se ejecuta? Las próximas secciones se centrarán en responder esta pregunta, así como en proporcionarte las herramientas para encontrar dónde residen estos archivos en el sistema.
+
+### 5.5.1 ¿Dónde están ubicados estos comandos?
+
+Para buscar la ubicación de un comando o de las páginas man para un comando, utiliza el comando `whereis` (o «dónde está» en español). Este comando busca los comandos, archivos de código fuente y las páginas man en las ubicaciones específicas donde estos archivos se almacenan normalmente:
+
+```bash
+sysadmin@localhost:~$ whereis ls
+ls: /bin/ls /usr/share/man/man1/ls.1.gz
+sysadmin@localhost:~$
+```
+
+Las páginas man se suelen distinguir fácilmente de los comandos ya que normalmente están comprimidas con un comando llamado `gzip`, dando por resultado un nombre de archivo que termina en `.gz`.
+
+Lo interesante es que verás que hay dos páginas man, pero sólo un comando (`/bin/ls`). Esto es porque el comando `ls` puede utilizarse con las opciones/funciones que se describen por cualquiera de las páginas man. Así que, cuando estás aprendiendo lo que puedes hacer con el comando `ls`, puedes explorar ambas páginas man. Afortunadamente, esto más bien es una excepción ya que la mayoría de los comandos sólo tienen una página man.
+
+### 5.5.2 Encontrar Cualquier Archivo o Directorio
+
+El comando `whereis` está diseñado para encontrar de manera específica las páginas man y los comandos. Si bien esto es útil, hay veces en las que quieras encontrar un archivo o directorio, no sólo archivos de comandos o páginas man.
+
+Para encontrar cualquier archivo o directorio, puedes utilizar el comando `locate` (o «localizar» en español). Este comando buscará en una **base de datos** de todos los archivos y directorios que estaban en el sistema cuando se creó la base de datos. Por lo general, el comando que genera tal base de datos se ejecuta por la noche.
+
+```bash
+sysadmin@localhost:~$ locate gshadow
+/etc/gshadow
+/etc/gshadow-
+/usr/include/gshadow.h
+/usr/share/man/cs/man5/gshadow.5.gz
+/usr/share/man/da/man5/gshadow.5.gz
+/usr/share/man/de/man5/gshadow.5.gz
+/usr/share/man/fr/man5/gshadow.5.gz
+/usr/share/man/it/man5/gshadow.5.gz
+/usr/share/man/man5/gshadow.5.gz
+/usr/share/man/ru/man5/gshadow.5.gz
+/usr/share/man/sv/man5/gshadow.5.gz
+/usr/share/man/zh_CN/man5/gshadow.5.gz
+sysadmin@localhost:~$
+```
+
+Los archivos que creaste hoy normalmente no los vas a poder buscar con el comando `locate`. Si tienes acceso al sistema como usuario **root** (con la cuenta del administrador de sistema), puedes actualizar manualmente la base de datos de `locate` ejecutando el comando `updatedb`. Los usuarios regulares no pueden actualizar el archivo de base de datos.
+
+También ten en cuenta que cuando utilizas el comando `locate` como un usuario normal, tu salida puede ser limitada debido a los **permisos**. En general, si no tienes acceso a un archivo o directorio en el sistema de ficheros debido a los permisos, el comando `locate` no devolverá esos nombres. Esta es una característica de seguridad diseñada para evitar que los usuarios «exploren» el sistema de ficheros utilizando el comando `locate`. El usuario root puede buscar cualquier archivo en la base de datos con el comando `locate`.
+
+### 5.5.3 Contar el Número de Archivos
+
+La salida del comando `locate` puede ser bastante grande. Cuando buscas un nombre de archivo, como `passwd`, el comando `locate` producirá cada archivo que contiene la cadena `passwd`, no sólo los archivos `passwd`.
+
+En muchos casos, puede que quieras empezar listando cuántos archivos coincidirán. Lo puedes hacer mediante la opción `-c` del comando `locate`:
+
+```bash
+sysadmin@localhost:~$ locate -c passwd
+97
+sysadmin@localhost:~$
+```
+
+### 5.5.4 Limitando la Salida
+
+Puedes limitar la salida producida por el comando `locate` mediante la opción `-b`. Esta opción sólo incluye los listados que contienen el término de búsqueda en el **basename** del archivo. El basename es la parte del nombre de archivo que no incluye los nombres de directorio.
+
+```bash
+sysadmin@localhost:~$ locate -c -b passwd
+83
+sysadmin@localhost:~$
+```
+
+Como puedes ver en la salida anterior, todavía habrá muchos resultados cuando utilices la opción `-b`. Para limitar la salida aún más, coloca un carácter `\` delante del término de búsqueda. Este carácter limita la salida a los nombres de archivo que coincidan exactamente con el término:
+
+```bash
+sysadmin@localhost:~$ locate -b "\passwd"
+/etc/passwd
+/etc/cron.daily/passwd
+/etc/pam.d/passwd
+/usr/bin/passwd
+/usr/share/doc/passwd
+/usr/share/lintian/overrides/passwd
+sysadmin@localhost:~$
+```
+
+### Resumen del capítulo
+
+- Las **páginas man** (`man comando`) son la fuente de ayuda tradicional en Linux; se visualizan mediante un localizador (`less` o `more`) y se organizan en secciones estándar como `NAME`, `SYNOPSIS`, `DESCRIPTION`, `OPTIONS`, `FILES`, `AUTHOR`, `SEE ALSO`, entre otras.
+- Existen **nueve secciones numeradas** de páginas man (comandos de usuario, llamadas al sistema, librerías, archivos especiales, formatos de archivo, juegos, otros, administración y kernel); se puede especificar la sección con `man N comando` cuando hay nombres duplicados.
+- Las opciones `-f` (o `whatis`) y `-k` (o `apropos`) del comando `man` permiten buscar páginas man por nombre exacto o por palabra clave, respectivamente.
+- El comando `info` ofrece una documentación organizada en **nodos** enlazados por hipervínculos, con un estilo más orientado al aprendizaje que las páginas man, que son más bien de referencia.
+- Otras fuentes de ayuda incluyen la opción `--help` de los comandos y los archivos README/documentación adicional ubicados típicamente en `/usr/share/doc`.
+- Los comandos `whereis` y `locate` permiten encontrar la ubicación física de comandos, páginas man, archivos y directorios en el sistema, este último mediante una base de datos que se actualiza con `updatedb` y que respeta los permisos del sistema de ficheros.

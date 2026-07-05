@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 320" font-family="Helvetica Neue, Arial, sans-serif">
+  <title>Flujo de control de un bucle for en un script shell</title>
+  <defs>
+    <marker id="arrow9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a6a7a"/>
+    </marker>
+  </defs>
+  <rect width="560" height="320" fill="#ffffff"/>
+  <text x="280" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Flujo de control de un bucle for en un script shell</text>
+
+  <!-- loop back path (drawn first, behind) -->
+  <polyline points="400,245 520,245 520,40 250,40 250,66" fill="none" stroke="#999999" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow9)"/>
+
+  <!-- S1 -->
+  <rect x="100" y="20" width="300" height="40" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="250" y="45" text-anchor="middle" font-size="12" font-family="SFMono-Regular, Menlo, Consolas, monospace" fill="#1a4d8b">for var in lista; do</text>
+
+  <line x1="250" y1="60" x2="250" y2="65" stroke="#5a6a7a" stroke-width="1.5"/>
+
+  <!-- Diamond -->
+  <polygon points="250,65 360,110 250,155 140,110" fill="#fff3e0" stroke="#b36b00" stroke-width="1.5"/>
+  <text x="250" y="106" text-anchor="middle" font-size="11.5" fill="#7a4a00">¿Quedan</text>
+  <text x="250" y="120" text-anchor="middle" font-size="11.5" fill="#7a4a00">elementos?</text>
+
+  <!-- yes branch -->
+  <line x1="250" y1="155" x2="250" y2="220" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow9)"/>
+  <text x="262" y="190" text-anchor="start" font-size="11" fill="#2e7d32">Sí</text>
+
+  <rect x="100" y="220" width="300" height="50" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="250" y="240" text-anchor="middle" font-size="12" fill="#215a26">Ejecutar bloque de comandos</text>
+  <text x="250" y="257" text-anchor="middle" font-size="12" font-family="SFMono-Regular, Menlo, Consolas, monospace" fill="#215a26">usando $var</text>
+
+  <!-- no branch -->
+  <line x1="360" y1="110" x2="400" y2="118" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow9)"/>
+  <text x="368" y="100" text-anchor="start" font-size="11" fill="#8b1a1a">No</text>
+
+  <rect x="400" y="95" width="150" height="50" rx="8" fill="#fbeaea" stroke="#8b1a1a" stroke-width="1.5"/>
+  <text x="475" y="115" text-anchor="middle" font-size="11.5" fill="#8b1a1a">Fin del bucle (done);</text>
+  <text x="475" y="131" text-anchor="middle" font-size="11.5" fill="#8b1a1a">continúa el script</text>
+
+  <text x="280" y="298" text-anchor="middle" font-size="10.5" font-style="italic" fill="#666666">El mismo patrón aplica a "while condición; do ... done", evaluando la condición en cada vuelta.</text>
+</svg>

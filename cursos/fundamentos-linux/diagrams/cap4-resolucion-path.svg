@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 620" font-family="Helvetica Neue, Arial, sans-serif">
+  <title>Cómo Bash resuelve un comando escrito en la línea de comandos</title>
+  <defs>
+    <marker id="arrow4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a6a7a"/>
+    </marker>
+  </defs>
+  <rect width="700" height="620" fill="#ffffff"/>
+  <text x="350" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">¿Cómo resuelve Bash un comando escrito en el prompt?</text>
+
+  <!-- S1 -->
+  <rect x="100" y="34" width="320" height="40" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="260" y="58" text-anchor="middle" font-size="12.5" fill="#1a4d8b">Usuario escribe un comando en el prompt</text>
+  <line x1="260" y1="74" x2="260" y2="95" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+  <!-- D1 diamond -->
+  <polygon points="260,95 370,130 260,165 150,130" fill="#fff3e0" stroke="#b36b00" stroke-width="1.5"/>
+  <text x="260" y="126" text-anchor="middle" font-size="11.5" fill="#7a4a00">¿Es un alias</text>
+  <text x="260" y="140" text-anchor="middle" font-size="11.5" fill="#7a4a00">definido?</text>
+
+  <line x1="370" y1="130" x2="430" y2="130" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <text x="398" y="122" text-anchor="middle" font-size="11" fill="#2e7d32">Sí</text>
+  <rect x="430" y="100" width="260" height="60" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="560" y="124" text-anchor="middle" font-size="11.5" fill="#215a26">Bash sustituye el alias por el</text>
+  <text x="560" y="140" text-anchor="middle" font-size="11.5" fill="#215a26">comando que representa y continúa</text>
+
+  <line x1="260" y1="165" x2="260" y2="190" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <text x="272" y="182" text-anchor="start" font-size="11" fill="#8b1a1a">No</text>
+
+  <!-- D2 diamond -->
+  <polygon points="260,190 400,230 260,270 120,230" fill="#fff3e0" stroke="#b36b00" stroke-width="1.5"/>
+  <text x="260" y="223" text-anchor="middle" font-size="11.5" fill="#7a4a00">¿Es un comando interno</text>
+  <text x="260" y="237" text-anchor="middle" font-size="11.5" fill="#7a4a00">(built-in) o función del shell?</text>
+
+  <line x1="400" y1="230" x2="430" y2="230" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <text x="415" y="222" text-anchor="middle" font-size="11" fill="#2e7d32">Sí</text>
+  <rect x="430" y="200" width="260" height="60" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="560" y="224" text-anchor="middle" font-size="11.5" fill="#215a26">Bash lo ejecuta directamente</text>
+  <text x="560" y="240" text-anchor="middle" font-size="11.5" fill="#215a26">(ej. cd, alias, export)</text>
+
+  <line x1="260" y1="270" x2="260" y2="300" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <text x="272" y="292" text-anchor="start" font-size="11" fill="#8b1a1a">No</text>
+
+  <!-- S2 -->
+  <rect x="90" y="300" width="340" height="55" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="260" y="322" text-anchor="middle" font-size="11.5" fill="#1a4d8b">Bash busca el nombre del comando en cada</text>
+  <text x="260" y="338" text-anchor="middle" font-size="11.5" fill="#1a4d8b">directorio de $PATH, en el orden en que aparecen</text>
+
+  <line x1="260" y1="355" x2="260" y2="380" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+  <!-- D3 diamond -->
+  <polygon points="260,380 400,425 260,470 120,425" fill="#fff3e0" stroke="#b36b00" stroke-width="1.5"/>
+  <text x="260" y="418" text-anchor="middle" font-size="11.5" fill="#7a4a00">¿Se encontró un archivo</text>
+  <text x="260" y="432" text-anchor="middle" font-size="11.5" fill="#7a4a00">ejecutable con ese nombre?</text>
+
+  <line x1="190" y1="460" x2="150" y2="515" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <text x="130" y="490" text-anchor="middle" font-size="11" fill="#2e7d32">Sí</text>
+  <rect x="30" y="515" width="260" height="70" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="160" y="538" text-anchor="middle" font-size="11.5" fill="#215a26">Se ejecuta el primer archivo</text>
+  <text x="160" y="554" text-anchor="middle" font-size="11.5" fill="#215a26">encontrado (ej. /usr/bin/ls) y</text>
+  <text x="160" y="570" text-anchor="middle" font-size="11.5" fill="#215a26">ahí se detiene la búsqueda</text>
+
+  <line x1="330" y1="460" x2="400" y2="515" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <text x="410" y="490" text-anchor="middle" font-size="11" fill="#8b1a1a">No</text>
+  <rect x="380" y="515" width="290" height="70" rx="8" fill="#fbeaea" stroke="#8b1a1a" stroke-width="1.5"/>
+  <text x="525" y="545" text-anchor="middle" font-size="12" font-family="SFMono-Regular, Menlo, Consolas, monospace" fill="#8b1a1a">bash: comando: command not found</text>
+  <text x="525" y="562" text-anchor="middle" font-size="10.5" fill="#8b1a1a">(no encontrado en ningún directorio de $PATH)</text>
+
+  <text x="350" y="605" text-anchor="middle" font-size="10.5" font-style="italic" fill="#666666">Orden real de resolución en Bash: alias → función/built-in → búsqueda en $PATH.</text>
+</svg>

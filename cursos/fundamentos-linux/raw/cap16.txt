@@ -1,0 +1,389 @@
+16.1 Introducción
+En el capítulo anterior se detallaron los permisos básicos de Linux: leer, escribir y ejecutar. En la mayoría de las circunstancias, estos permisos básicos de Linux serán suficientes para dar cabida a las necesidades de seguridad de los usuarios u organizaciones individuales.
+
+Sin embargo, cuando varios usuarios necesitan trabajar de forma rutinaria en los mismos directorios y archivos, estos permisos pueden no ser suficientes. Los permisos especiales setuid, setgid y sticky bit están diseñados para hacer frente a estas preocupaciones. En este capítulo vas a ver cómo estos permisos especiales funcionan y cómo configurarlos.
+
+Conocer la estructura básica del sistema de archivos puede ser esencial para poder trabajar con éxito con Linux. El Estándar de Jerarquía del Sistema de Archivos (FHS) («Filesystem Hierarchy Standard» en inglés) proporciona una guía para la mayoría de las distribuciones de Linux para saber qué directorios hay y qué poner en ellos. Este capítulo trata de este estándar, así como del propósito de estos directorios comunes.
+
+
+Es bueno ser buscado. 75% de los profesionales de Linux han recibido una llamada de un reclutador en los últimos 6 Meses. Casi la mitad recibieron más de 6 llamadas.
+
+16.2 El Permiso setuid
+Cuando el permiso setuid se encuentra en un archivo binario ejecutable (Alias, un programa), el archivo binario se «ejecuta como» el propietario del archivo, no como el usuario que lo ejecuta. Este permiso se establece en una cierta cantidad de utilidades del sistema para que puedan ser manejados por los usuarios normales, pero ejecutados con los permisos root, proporcionando acceso a los archivos del sistema a los que el usuario normal normalmente no tiene acceso.
+
+Considera el siguiente escenario en el que el usuario sysadmin intenta ver el contenido del archivo /etc/shadow:
+
+sysadmin@localhost:~$ more /etc/shadow
+/etc/shadow: Permission denied
+sysadmin@localhost:~$ ls -l /etc/shadow
+-rw-r-----. 1 root root 5195 Oct 21 19:57 /etc/shadow
+Como puedes ver, el archivo /etc/shadow no se puede ver (o modificar) por los usuarios normales debido a que los permisos del archivo /etc/shadow son: -rw-r-----. Dado que el archivo es propiedad del usuario root, el administrador del sistema podría modificar temporalmente los permisos en el caso de que quisieran ver o modificar este archivo.
+
+Consideremos ahora el comando passwd. Cuando se ejecuta este comando, se modifica el archivo /etc/shadow. Esto parece imposible porque otros comandos que el usuario sysadmin ejecuta e intentan acceder a este archivo, fallan. Así que, ¿Por qué el usuario sysadmin puede modificar el archivo /etc/shadow mientras se ejecuta el comando passwd cuando normalmente este usuario no tiene acceso al archivo?
+
+El comando passwd tiene el permiso especial setuid. Cuando se ejecuta el comando passwd y éste accede al archivo /etc/shadow, el sistema actúa como si el usuario que accede al archivo fuera el propietario del comando passwd (el usuario root), no el usuario que está ejecutando realmente el comando.
+
+Puedes ver este conjunto de permisos mediante la ejecución del comando ls -l:
+
+sysadmin@localhost:~$ ls -l /usr/bin/passwd
+-rwsr-xr-x 1 root root 31768 Jan 28 2010 /usr/bin/passwd
+Observa el resultado del comando ls anterior; el permiso setuid está representado por s en los permisos de propietario, donde normalmente se esperaría el permiso de ejecución.
+
+ 
+Al igual que los permisos de lectura, escritura y ejecución, permisos especiales pueden ser ajustados con el comando chmod, utilizando cualquiera de los métodos, simbólicos y octales.
+
+Para agregar el permiso setuid simbólicamente, ejecuta:
+
+chmod u+s file
+Para agregar el permiso setuid numéricamente, agrega 4000 a los permisos existentes del archivo (asume que el archivo tenía originalmente 775 para su permiso en el ejemplo siguiente):
+
+chmod 4775 file
+Para retirar el permiso setuid simbólicamente, ejecuta:
+
+chmod u-s file
+Para retirar el permiso setuid numéricamente, resta 4000 de los permisos existentes del archivo:
+
+chmod 0775 file
+En el capítulo anterior, establecimos permisos con el método octal utilizando códigos de tres dígitos. Cuando se proporciona un código de tres dígitos, el comando chmod supone que el primer dígito antes del código de tres dígitos es 0. Los permisos especiales serán establecidos sólo si se fijan los cuatro dígitos.
+Si se especifican tres dígitos cuando se cambian los permisos en un archivo que ya tiene un conjunto de permisos especiales, el primer dígito se establecerá en 0 y el permiso especial se quita del archivo.
+
+16.3 El Permiso setgid en un Archivo
+El permiso setgid es similar a setuid, pero hace uso de los permisos del grupo propietario. En realidad, hay dos formas de permisos setgid: setgid en un archivo y setgid en un directorio. Cómo funciona el setgid depende de si se establece en un archivo o un directorio.
+
+El permiso setgid en un archivo es muy similar a setuid; permite que un usuario ejecute un archivo binario ejecutable proporcionando un acceso adicional (temporal) de grupo. El sistema permitirá que el usuario que ejecuta el comando pertenezca al grupo al que pertenece el archivo, pero sólo «en» el programa setgid. A medida que el comando se ejecuta y accede a archivos, esta afiliación adicional al grupo puede proporcionar acceso a los archivos.
+
+Un buen ejemplo del permiso setgid en un archivo ejecutable es el comando /usr/bin/wall. Observa los permisos de este archivo y el grupo propietario:
+
+sysadmin@localhost:~$ ls -l /usr/bin/wall
+-rwxr-sr-x. 1 root tty 10996 Jul 19  2011 /usr/bin/wall
+Se puede ver que este archivo es setgid por la presencia de la s en la posición de ejecución del grupo. Debido a que este ejecutable pertenece al grupo TTY, cuando un usuario ejecuta este comando, el comando podrá acceder a los archivos que son propiedad del grupo TTY.
+
+Este acceso es importante porque el comando /usr/bin/wall envía mensajes a «terminales». Esto se logra al escribir datos en archivos como los siguientes:
+
+sysadmin@localhost:~$ ls -l /dev/tty?
+crw-------. 1 root tty  4, 0 Mar 29  2013 /dev/tty0
+crw--w----. 1 root tty  4, 1 Oct 21 19:57 /dev/tty1
+Ten en cuenta que el grupo tty tiene permiso de escritura en los archivos anteriores, mientras que los usuarios que no están en el grupo tty ( «otros») no tienen permisos en estos archivos. Sin el permiso setgid, el comando /usr/bin/wall fallaría.
+
+16.4 El Permiso setgid en un Directorio
+El permiso setgid también se puede establecer en un directorio. Cuando se establece en un directorio, setgid hace que los archivos creados en el directorio automáticamente sean propiedad del grupo que posee el directorio. Esto es contrario a cómo funcionaría normalmente la propiedad de grupo de un archivo nuevo, ya que por defecto los archivos nuevos son propiedad del grupo primario del usuario que creó el archivo.
+
+Además, los directorios creados dentro de un directorio que tiene «establecido» el permiso setgid no sólo serán propiedad del grupo que posee el directorio setgid, sino ademas el nuevo directorio de forma automática tendrá el permiso setgid también. En otras palabras, si un directorio es setgid, entonces, los directorios creados dentro de ese directorio heredarán el permiso setgid.
+
+A continuación se muestra la función del permiso setgid en un directorio. Observa que el usuario sysadmin crea un archivo en un directorio setgid /tmp/data y que el grupo al que pertenece el archivo no es el grupo primario sysadmin, sino más bien el grupo que posee el directorio demo:
+
+sysadmin@localhost:~$  ls -ld /tmp/data
+drwxrwsrwx. 2 root demo 4096 Oct 30 23:20 /tmp/data
+sysadmin@localhost:~$ id
+uid=500(sysadmin) gid=500(sysadmin)
+groups=500(sysadmin),10001(research),10002(development) 
+context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+sysadmin@localhost:~$  touch /tmp/data/file.txt
+sysadmin@localhost:~$  ls -ld /tmp/data/file.txt
+-rw-rw-r--. 1 bob demo 0 Oct 30 23:21 /tmp/data/file.txt
+Entonces, ¿Por qué el administrador configuraría un directorio setgid? En primer lugar, ten en cuenta las siguientes cuentas de usuario:
+
+bob es miembro de payroll group
+sue es miembro de staff group
+tim es miembro de acct group
+Estos tres usuarios necesitan trabajar en un proyecto conjunto. Se acercan al administrador para solicitar un directorio compartido en el que puedan trabajar juntos, pero que nadie más pueda acceder a sus archivos. El administrador hace lo siguiente:
+
+Crea un nuevo grupo llamado team.
+Añade bob, sue y tim al grupo team.
+Hace un nuevo directorio llamado /home/team.
+Hace que el grupo propietario del directorio /home/team sea el grupo team.
+Otorga al directorio /home/team los siguientes permisos: rwxrwx---
+Como resultado, bob, sue y tim pueden acceder al directorio /home/team y agregar archivos. Sin embargo, hay un problema potencial: cuando bob crea un archivo en el directorio /home/team, los detalles del nuevo archivo se ven así:
+
+-rw-r-----. 1 bob payroll 100 Oct 30 23:21 /home/team/file.txt
+Desafortunadamente, mientras sue y tim pueden acceder al directorio /home/team, no pueden hacer nada con el archivo de bob. Sus permisos para ese archivo son los permisos de «otros» (---).
+
+Si el administrador estableciera el permiso setgid al directorio /home/team, entonces, cuando bob crea el archivo, se vería de la siguiente manera:
+
+-rw-r-----. 1 bob team 100 Oct 30 23:21 /home/team/file.txt
+Y como resultado, sue y tim tendrían acceso de grupo al archivo (r--).
+
+Ciertamente, bob podría cambiar la propiedad de grupo después de crear el archivo (o cambiar los permisos de «otros»), pero esto sería tedioso si se crearan muchos archivos nuevos. El permiso setgid hace que sea más fácil esta situación.
+
+16.5 Configurar el Permiso setgid
+Utiliza la siguiente sintaxis para agregar el permiso setgid simbólicamente:
+
+chmod g+s <archivo|directorio>
+Para agregar el permiso setgid numéricamente, añade 2000 a los permisos existentes del archivo (asume en el ejemplo siguiente de que el directorio tenía originalmente 775 para su permiso):
+
+chmod 2775 <archivo|directorio>
+Para retirar el permiso setgid simbólicamente, ejecuta:
+
+chmod g-s <archivo|directorio>
+Para retirar el permiso setgid numéricamente, resta 2000 de los permisos existentes del archivo:
+
+chmod 0775 <archivo|directorio>
+En un listado largo el permiso setgid está representado por una s en la posición de ejecución del grupo: drwxrwsr-x.
+
+Una s minúscula significa tanto los permisos de ejecución de setgid como los de grupo están establecidos. Una S mayúscula significa que sólo el permiso setgid está establecido y no el permiso de ejecución del grupo: drwxrwSr-x.
+
+Si ves una S mayúscula en la posición de ejecución del grupo, esto indica que, aunque se haya establecido el permiso setgid, en realidad no está realmente en efecto debido a que el grupo carece de los permisos de ejecución para utilizarlo.
+
+16.6 El Permiso Sticky Bit
+El permiso sticky bit se utiliza para evitar que otros usuarios eliminen los archivos de los que no son dueños en un directorio compartido. ¡Recordemos que cualquier usuario con permiso de escritura en un directorio puede crear archivos en ese directorio, así como eliminar cualquier archivo del directorio, incluso si no es el propietario del archivo!
+
+El permiso sticky bit permite que los archivos se puedan compartir con otros usuarios, cambiando el permiso de escritura en el directorio para que los usuarios aún puedan añadir y eliminar los archivos del directorio, pero los archivos sólo pueden ser borrados por el propietario del archivo o el usuario root.
+
+Para establecer el permiso sticky bit simbólicamente, ejecuta un comando como el siguiente:
+
+chmod o+t <directorio>
+Para establecer el permiso sticky bit numéricamente, añade 1000 a los permisos existentes del directorio (asume que el directorio en el ejemplo siguiente tenía originalmente 775 para su permiso):
+
+chmod 1775 <archivo|directorio>
+Para retirar el permiso sticky bit simbólicamente, ejecuta:
+
+chmod o-t <directorio>
+Para retirar el permiso sticky bit numéricamente, resta 1000 de los permisos existentes del directorio:
+
+chmod 0775 <directorio>
+La salida del comando ls -l visualiza el permiso sticky bit con una t en la posición de ejecución de «otros»: drwxrwxrwt.
+
+Una t minúscula significa que tanto el permiso sticky bit como los permisos de ejecución están establecidos para «otros». Una T mayúscula significa que sólo el permiso sticky bit está establecido: drwxrwxrwT.
+
+Mientras la S mayúscula indica un problema con los permisos setuid o setgid, una T mayúscula no indica necesariamente un problema, siempre y cuando el grupo propietario aún tenga permiso de ejecución.
+
+Un buen ejemplo del uso de directorios con el permiso sticky bit serían los directorios /tmp y /var/tmp. Estos directorios están diseñados como ubicaciones donde cualquier usuario puede crear un archivo temporal.
+
+Debido a que estos directorios están destinados a ser modificables por todos los usuarios, están configurados para utilizar el permiso sticky bit. Sin este permiso especial, un usuario podría eliminar los archivos temporales de otro usuario.
+
+16.7 Los Enlaces Físicos y los Enlaces Simbólicos
+Considera el siguiente escenario: hay un archivo profundamente enterrado en el sistema de archivos llamado /usr/share/doc/superbigsoftwarepackage/data/2013/october/tenth/valuable-information.txt. Es un archivo que se actualiza de forma rutinaria por otro usuario y al que habitualmente necesitas tener acceso. Introducir este largo nombre de archivo no es una opción ideal, pero el archivo debe residir en este lugar y, ya que se actualiza de forma regular, no se puede simplemente hacer una copia del archivo.
+
+Ésta es una situación en la que los enlaces físicos y los simbólicos (blandos) pueden ser útiles. Se puede crear un archivo que se enlazara al que está «profundamente enterrado». Este nuevo archivo podría ser colocado en tu directorio home o cualquier otro lugar conveniente. Cuando accedes al archivo nuevo de «enlace», éste accederá a los contenidos del archivo valuable-information.txt.
+
+Cada método de enlace, físico o simbólico, resulta en el mismo acceso global, pero utilizan diferentes técnicas. Existen ventajas y desventajas de cada método, por lo que conocer ambas técnicas y cuando se usan es importante.
+
+16.7.1 Creación de los Vínculos Físicos
+Con el fin de entender los enlaces físicos, hay que entender un poco cómo el sistema de archivos realiza un seguimiento de los archivos. Por cada archivo creado, hay un bloque de datos en el sistema de archivos que almacena la información meta del archivo. La información meta incluye información sobre el archivo, tal como los permisos, propiedades y marcas de tiempo. Información meta no incluye el nombre del archivo o el contenido del archivo, pero sí incluye casi toda la demás información sobre el archivo.
+
+A esta información meta se le llama la tabla de inodos del archivo. La tabla de inodos también incluye punteros a otros bloques en el sistema de archivos llamados bloques de datos donde se almacenan los datos.
+
+Cada archivo en una partición tiene un número de identificación único llamado número de inodo. El comando ls -i mostrará el número de inodo de un archivo. Al igual que los usuarios y grupos, lo que realmente define un archivo no es su nombre, sino más bien el número que se le haya asignado.
+
+La tabla de inodos no incluye el nombre del archivo. Para cada archivo, también hay una entrada que se almacena en el área de datos de un directorio (bloque de datos) que incluye una asociación entre un número de inodo y un nombre de archivo.
+
+En el bloque de datos para el directorio /etc habría una lista de todos los archivos de este directorio y su número de inodo correspondiente. Por ejemplo:
+
+passwd	123
+shadow	175
+group	144
+gshadow	897
+Cuando se intenta acceder al archivo /etc/passwd, el sistema utiliza esta tabla para traducir el nombre de archivo en un número de inodo. A continuación, recupera los datos del archivo al ver la información en la tabla de inodos para el archivo.
+
+Los enlaces físicos son dos nombres de archivo que apuntan al mismo inodo. Por ejemplo, considera las siguientes entradas de directorio:
+
+passwd	123
+mypasswd	123
+shadow	175
+group	144
+gshadow	897
+Debido a que tanto el archivo passwd como el mypasswd tienen el mismo número de inodo, en realidad, son el mismo archivo. Puedes acceder a los datos del archivo utilizando cualquiera de los dos nombres de archivo.
+
+Al ejecutar el comando ls -l, el número que aparece para cada archivo entre los permisos de usuario y el propietario es la cuenta de enlaces:
+
+sysadmin@localhost:~$ echo data > file.original 
+sysadmin@localhost:~$ ls -li file.* 
+278772 -rw-rw-r--. 1 sysadmin sysadmin 5 Oct 25 15:42 file.original
+El número contador de enlaces indica cuántos enlaces físicos fueron creados. Cuando el número es un valor de uno, entonces el archivo sólo tiene un nombre relacionado con el inodo.
+
+Para crear los enlaces físicos, se utiliza el comando ln con el primer argumento siendo el nombre de archivo existente y el segundo argumento es el nuevo archivo. Cuando utilizas el comando ln para crear un enlace físico, el número del enlace aumentará en una unidad por cada nombre de archivo adicional que enlaces:
+
+sysadmin@localhost:~$ ln file.original file.hard.1
+sysadmin@localhost:~$ ls -li file.*
+278772 -rw-rw-r--. 2 sysadmin sysadmin 5 Oct 25 15:53 file.hard.1
+278772 -rw-rw-r--. 2 sysadmin sysadmin 5 Oct 25 15:53 file.original
+
+16.7.2 Creación de Enlaces Simbólicos
+Un enlace simbólico es simplemente un archivo que apunta a otro archivo. Hay varios enlaces simbólicos que ya están en el sistema, incluyendo varios en el directorio /etc :
+
+sysadmin@localhost:~$ ls -l /etc/grub.conf
+lrwxrwxrwx. 1 root root 22 Feb 15  2011 /etc/grub.conf -> ../boot/grub/grub.conf
+En el ejemplo anterior, se puede ver que el archivo /etc/grub.conf «apunta» al archivo ../boot/grub/grub.conf. Por lo tanto, si intentaras ver el contenido del archivo /etc/grub.conf, éste seguiría el puntero y mostraría el contenido del archivo ../boot/grub/grub.conf.
+
+Para crear un enlace simbólico, utiliza la opción -s con el comando ln:
+
+sysadmin@localhost:~$  ln -s /etc/passwd mypasswd
+sysadmin@localhost:~$  ls -l mypasswd
+lrwxrwxrwx. 1 sysadmin sysadmin 11 Oct 31 13:17 mypasswd -> /etc/passwd
+
+16.7.3 Comparación de los Enlaces Físicos y Simbólicos
+Mientras que los enlaces físicos y simbólicos tienen el mismo resultado final, las diferentes técnicas producen diferentes ventajas y desventajas. De hecho, la ventaja de una técnica compensa la desventaja de la otra técnica.
+
+Ventaja: Enlaces físicos - ningún punto único de fallo
+
+Una de las ventajas de utilizar los enlaces físicos es que cada nombre de archivo para el contenido del archivo es equivalente. Si tienes cinco archivos enlazados físicamente entre sí, entonces eliminando cualquiera de estos cuatro archivos no daría lugar a la eliminación del contenido del archivo real.
+
+Recordemos que realmente un archivo está asociado con un número de inodo único. Mientras permanezca uno de los archivos enlazados físicamente, entonces ese número de inodo sigue existiendo. Esto significa que aún existen los datos del archivo.
+
+Los enlaces simbólicos, sin embargo, tienen un único punto de fallo: el archivo original. Consideremos el siguiente ejemplo en el que el acceso a los datos fallará si se elimina el archivo original:
+
+sysadmin@localhost:~$ echo "hi there" > test.txt
+sysadmin@localhost:~$ ln -s test.txt mytest.txt
+sysadmin@localhost:~$ more test.txt
+hi there
+sysadmin@localhost:~$ more mytest.txt
+hi there
+sysadmin@localhost:~$ rm test.txt
+sysadmin@localhost:~$ more mytest.txt
+mytest.txt: No such file or directory
+sysadmin@localhost:~$ ls -l mytest.txt
+lrwxrwxrwx. 1 sysadmin sysadmin 8 Oct 31 13:29 mytest.txt -> test.txt
+Ventaja: Los enlaces blandos - fáciles de ver
+
+A veces puede ser difícil saber dónde están los enlaces físicos a un archivo. Si ves un archivo normal con un número de enlace mayor que uno, puedes utilizar el comando find con el criterio de búsqueda -inum para localizar los otros archivos que tienen el mismo número de inodo. Para encontrar el número de inodo, primero utilizarías el comando ls -i:
+
+sysadmin@localhost:~$ ls -i file.original 
+278772 file.original
+sysadmin@localhost:~$ find / -inum 278772 2> /dev/null
+/home/sysadmin/file.hard.1
+/home/sysadmin/file.original
+Los enlaces blandos son mucho más visuales y no requieren ningún comando adicional más allá del comando ls para determinar el vínculo:
+
+sysadmin@localhost:~$ ls -l mypasswd
+lrwxrwxrwx. 1 sysadmin sysadmin 11 Oct 31 13:17 mypasswd -> /etc/passwd
+Ventaja: Los enlaces blandos - pueden vincular cualquier archivo
+
+Debido a que cada sistema de archivos (partición) tiene un conjunto independiente de inodos, no se pueden crear enlaces físicos que intenten cruzar los sistemas de archivos:
+
+sysadmin@localhost:~$ ln /boot/vmlinuz-2.6.32-358.6.1.el6.i686 Linux.Kernel
+ln: creating hard link `Linux.Kernel' => `/boot/vmlinuz-2.6.32-358.6.1.el6.i686': Invalid cross-device link
+En el ejemplo anterior, se intentó crear un enlace físico entre un archivo en el sistema de archivos /boot y el sistema de archivos /; éste falló porque cada uno de estos sistemas de archivos tiene un conjunto único de números de inodo que no se pueden utilizar fuera del sistema de archivos.
+
+Sin embargo, debido a que un enlace simbólico apunta a otro archivo con un nombre de ruta, se puede crear un vínculo simbólico a un archivo en otro sistema de archivos:
+
+sysadmin@localhost:~$  ln -s /boot/vmlinuz-2.6.32-358.6.1.el6.i686 Linux.Kernel
+sysadmin@localhost:~$  ls -l Linux.Kernel
+lrwxrwxrwx. 1 sysadmin sysadmin 11 Oct 31 13:17 Linux.Kernel -> /boot/vmlinuz-2.6.32-358.6.1.el6.i686
+Ventaja: Enlaces blandos - pueden enlazar un directorio
+
+Otra limitación de los enlaces físicos es que no se pueden crear en directorios. La razón de esta limitación es que el propio sistema operativo utiliza enlaces físicos para definir la jerarquía de la estructura de directorios. El siguiente ejemplo muestra el mensaje de error que se muestra si se intenta enlazar físicamente un directorio:
+
+sysadmin@localhost:~$ ln /bin binary
+ln: `/bin': hard link not allowed for directory
+Enlazando los directorios utilizando un enlace simbólico está permitido:
+
+sysadmin@localhost:~$ ln -s /bin binary
+sysadmin@localhost:~$ ls -l binary
+lrwxrwxrwx. 1 sysadmin sysadmin 11 Oct 31 13:17 binary -> /bin
+
+16.8 Estándar de Jerarquía del Sistema de Archivos
+Entre los estándares soportados por la Fundación Linux está el Estándar de Jerarquía del Sistema de Archivos (FHS), que está alojado en la URL http://www.pathname.com/fhs.
+
+Un estándar es un conjunto de reglas o directrices que se recomiendan a seguir. Sin embargo, estas directrices sin duda pueden romperse, ya sea por las distribuciones enteras o por los administradores en las máquinas individuales.
+
+El estándar FHS categoriza cada directorio del sistema de dos maneras:
+
+Un directorio puede ser categorizado como compartible o no, es decir, si el directorio puede ser compartido en una red y utilizado por varios equipos.
+El directorio se pone en una categoría de tener archivos estáticos (el contenido del archivo no cambiará) o archivos variables (el contenido del archivo puede cambiar).
+Con el fin de poder hacer estas clasificaciones, a menudo es necesario hacer referencia a los subdirectorios debajo del nivel superior de los directorios. Por ejemplo, el directorio /var en sí no puede ser clasificado como compartible o no compartible, pero uno de sus subdirectorios, el directorio /var/mail, es compartible. Por el contrario, el directorio /var/lock no debe ser compartible.
+
+No compartible	Compartible
+Variable	/var/lock	/var/mail
+Estático	/etc	/opt
+El estándar FHS define cuatro jerarquías de directorios utilizados en la organización de los archivos del sistema de archivos. El nivel superior o jerarquía root viene seguido por:
+
+Directorio	Propósito del Directorio
+/	La base de la estructura, o el root del sistema de archivos, este directorio unifica todos los directorios independientemente si son particiones locales, dispositivos extraíbles o recursos compartidos de red
+/bin	Para mantener binarios esenciales como los comandos ls, cp, y rm, y ser parte del sistema de archivos root.
+/boot	Contiene los archivos necesarios para arrancar el sistema, como el kernel de Linux y los archivos de configuración asociados
+/dev	Viene rellenado de archivos que representan los dispositivos de hardware y otros archivos especiales, tales como los archivos /dev/null y /dev/zero
+/etc	Contiene los archivos de configuración de host esenciales, como los archivos /etc/hosts o /etc/passwd
+/home	La ubicación de los directorios home de los usuarios
+/lib	Las librerías esenciales de soporte para los archivos ejecutables en los directorios /bin y /sbin
+/lib<qual>	Las librerías esenciales creadas para una arquitectura específica. Por ejemplo, el directorio /lib64 para los procesadores de 64 bit AMD/Intel x86 compatibles
+/media	El punto de montaje para los medios extraíbles que se montan automáticamente
+/mnt	Un punto de montaje para montar temporalmente sistemas de archivos de manera manual
+/opt	Ubicación opcional de la instalación de software de terceros
+/proc	Un sistema de archivos virtual para que el kernel reporte procesos y otra información
+/root	El directorio inicial del usuario root
+/sbin	Los binarios esenciales del sistema utilizados principalmente por el usuario root
+/sys	Un sistema de archivos virtual que contiene información acerca de los dispositivos de hardware conectados al sistema
+/srv	Ubicación donde los servicios específicos del sitio pueden estar alojados
+/tmp	Directorio en el que todos los usuarios tienen permiso para crear archivos temporales que deberían ser borrados durante el arranque (pero a menudo no es así)
+/usr	La segunda jerarquía de archivos que no son esenciales para el uso de múltiples usuarios
+/usr/local	La tercera jerarquía de archivos para software que no sea originario de la distribución
+/var	La jerarquía /var contiene archivos que cambian durante el tiempo
+/var/cache	Archivos utilizados para almacenar en caché, los datos de la aplicación
+/var/log	El directorio donde se ubica la mayoría de los archivos de registro
+/var/lock	Ubicación para guardar los archivos de bloqueo de los recursos compartidos
+/var/spool	Ubicación para almacenar los archivos spool de impresión y correo
+/var/tmp	Los archivos temporales que se deben conservar entre los reinicios
+La segunda y la tercera jerarquía, que se encuentra bajo los directorios /usr y /usr/local, repiten el patrón de muchos de los directorios clave que se encuentran debajo de la primera jerarquía o el sistema de archivos root. La cuarta jerarquía, el directorio /var, también repite algunos de los directorios de primer nivel, como lib, opt y tmp.
+
+Cuando el sistema de archivos root y su contenido se consideran esenciales o necesarios para arrancar el sistema, los directorios /var, /usr y /usr/local no se consideran esenciales para el proceso de arranque. Como resultado, el sistema de archivos root y sus directorios pueden ser los únicos disponibles en ciertas situaciones, tales como arrancar en modo de usuario único, un entorno diseñado para la solución de problemas del sistema.
+
+El directorio /usr sirve para contener software para su uso por varios usuarios. El directorio /usr a veces se comparte a través de la red y se monta como de sólo lectura. Los directorios comunes de segundo nivel se describen en la siguiente tabla:
+
+Directorio	Propósito del Directorio
+/usr/bin	Los binarios para el usuario común, usados cuando el sistema está en modo multiusuario
+/usr/include	Los archivos que se incluyen para compilar el software de distribución
+/usr/lib	Las librerías de soporte para los archivos ejecutables en los directorios /usr/bin y /usr/sbin
+/usr/lib<qual>	Las librerías no esenciales creadas para una arquitectura específica
+/usr/libexec	Los programas ejecutables utilizados por otros programas y no directamente por los usuarios
+/usr/sbin	Los binarios del sistema para su uso por el administrador en modo multiusuario
+/usr/share	Ubicación para almacenar documentación de software y otros datos de aplicación
+/usr/src	El código fuente para compilar el kernel
+La jerarquía /usr/local sirve para la instalación del software que no se origina con la distribución. A menudo, este directorio se utiliza para software que se complia a partir del código fuente. Los directorios de tercer nivel comunes que se encuentran bajo el directorio /usr/local se describen en la siguiente tabla:
+
+Directorio	Propósito del Directorio
+/usr/local/bin	Los binarios de software locales para el uso de un usuario ordinario
+/usr/local/etc	Los archivos de configuración de software locales
+/usr/local/include	Los archivos que necesitan ser incluidos con el fin de compilar el código fuente local
+/usr/local/lib	Los archivos de la librería de soporte para los archivos ejecutables en los directorios /usr/local/bin y /usr/local/sbin
+/usr/local/libexec	Los programas ejecutables utilizados por otros programas y no directamente por los usuarios
+/usr/local/sbin	Los binarios locales para uso del administrador del sistema
+/usr/local/share	Ubicación para almacenar las páginas man, páginas de información, y otra información de aplicaciones locales
+/usr/local/src	La ubicación en la que menudo se coloca el código fuente de software para ser compilado localmente
+
+16.9 La Organización Dentro de la Jerarquía del Sistema de Archivos
+Aunque el estándar FHS es útil para una comprensión detallada de la disposición de los directorios utilizados por la mayoría de las distribuciones de Linux, a continuación se ofrece una descripción más generalizada de la estructura de los directorios como realmente existen en una distribución típica de Linux.
+
+Los Directorios Home
+
+El directorio /home tendrá típicamente un directorio inferior para cada cuenta de usuario. Por ejemplo, el usuario bob normalmente tendrá su directorio home de /home/bob. Normalmente, sólo el usuario bob tendrá acceso a este directorio. Sin ser asignados permisos especiales en otros directorios, un usuario normalmente sólo puede crear archivos en su directorio home, en el directorio /tmp y el directorio /var/tmp.
+
+Los Directorios Binarios
+
+Los directorios binarios contienen programas que los usuarios y los administradores ejecutarán para iniciar los procesos o las aplicaciones del sistema. Los directorios binarios, que están destinados a ser utilizados por los usuarios sin privilegios, incluyen los directorios /bin, /usr/bin y /usr/local/bin. A veces el software de terceros también almacenará sus archivos ejecutables en los directorios, tales como /usr/local/application/bin y /opt/application/bin. Además, no es inusual que cada usuario tenga su propio directorio bin ubicado en su directorio home, tal como /home/bob/bin.
+
+Por otra parte, los directorios sbin están destinados principalmente a ser utilizados por el administrador del sistema (usuario root). Estos por lo general incluyen los directorios /sbin, /usr/sbin y /usr/local/sbin, aunque las aplicaciones administrativas de terceros también podrían utilizar directorios como /usr/local/application/sbin o /opt/application/sbin.
+
+Dependiendo de la distribución, la variable PATH puede no contener todos los directorios bin y sbin. Con el fin de poder ejecutar un comando en uno de estos directorios, el directorio debe ser incluido en la lista de las variables PATH o el usuario tiene que especificar la ruta al comando, por ejemplo: /sbin/ifconfig.
+
+Los Directorios de las Aplicaciones de Software
+
+A diferencia del sistema operativo Windows, donde las aplicaciones pueden tener todos sus archivos instalados en un único subdirectorio bajo el directorio C:\Program Files, las aplicaciones de Linux pueden tener sus archivos en varios directorios repartidos a lo largo del sistema de archivos de Linux. Para las distribuciones Debian, puedes ejecutar la aplicación dpkg -L para obtener la lista de ubicación de los archivos. En las distribuciones de Red Hat, puedes ejecutar la aplicación rpm -ql para listar la de ubicación de los archivos que pertenecen a esa aplicación.
+
+Los archivos binarios de los programas ejecutables pueden ir en el directorio /usr/bin, si vienen incluidos en el sistema operativo, o de lo contrario pueden ir a los directorios /usr/local/bin o /opt/application/bin en caso de que procedan de un tercero.
+
+Los datos para la aplicación pueden ser almacenados en uno de los siguientes subdirectorios: /usr/share, /usr/lib, /opt/application o /var/lib.
+
+El archivo relacionado con la documentación se puede almacenar en uno de los siguientes subdirectorios: /usr/share/doc, /usr/share/man o /usr/share/info.
+
+El archivo(s) de configuración global para una aplicación muy probablemente se almacene en un subdirectorio bajo el directorio /etc, mientras que los archivos de configuración personalizados (específicos para un usuario) para la aplicación están, probablemente, en un subdirectorio oculto del directorio home del usuario.
+
+Los Directorios de Librerías
+
+Las librerías son archivos que contienen código que se comparte entre varios programas. La mayoría de los nombres de archivo de la librería terminan con una extensión de archivo .so, lo que significa objeto compartido (shared object).
+
+Puede haber varias versiones de una librería debido a que el código puede ser diferente dentro de cada archivo a pesar de que puede llevar a cabo funciones similares a las otras versiones de la librerías. Una de las razones por las que el código puede ser diferente, a pesar de que puede hacer lo mismo que otro archivo de la biblioteca, es que está compilado para ejecutarse en un tipo diferente de procesador. Por ejemplo, es habitual que los sistemas que utilizan un código diseñado para los procesadores de tipo Intel/AMD de 64 bits, tengan las dos bibliotecas, la de 32 bits y de 64 bits.
+
+Las librerías que dan soporte a los programas binarios esenciales que se encuentran en los directorios /bin y /sbin típicamente se encuentran en /lib o /lib64.
+
+Para dar soporte a los ejecutables /usr/bin y /usr/sbin, normalmente se usan los directorios librerías /usr/lib y /usr/lib64.
+
+Para dar soporte a las aplicaciones que no se distribuyen con el sistema operativo, a menudo se utilizan los directorios librería /usr/local/lib y /opt/application/lib.
+
+Los Directorios de Datos Variables
+
+Los directorios /var y muchos de sus subdirectorios pueden contener datos que vayan a cambiar con frecuencia. Si el sistema se utiliza para correo electrónico, normalmente se utilizará /var/mail o /var/spool/mail para almacenar los datos de correo electrónico del usuario. Si vas a imprimir desde tu sistema, entonces el directorio /var/spool/cups se utilizará para almacenar temporalmente los trabajos de impresión.
+
+Dependiendo de los eventos que el sistema está registrando y la cantidad de actividad que hay en el sistema, se determinará el tamaño de tu archivo de registro. En un sistema ocupado, puede haber una considerable cantidad de datos en los archivos de registro. Estos archivos se almacenan en el directorio /var/log.
+
+Mientras que los archivos de registro pueden ser extremadamente útiles para solucionar los problemas, también pueden causar problemas. Una de las principales preocupaciones de todos estos directorios es que pueden llenar rápidamente el espacio del disco en un sistema activo. Si el directorio /var no es una partición separada, entonces el sistema de archivos root se podría llenar por completo y bloquear el sistema.
+

@@ -1,0 +1,439 @@
+# Capítulo 14: Gestión de Usuarios y Grupos
+
+## 14.1 Introducción
+
+En el capítulo anterior viste que la información de la cuenta de usuario se almacena en el archivo `/etc/passwd` y la información de autenticación de usuario (datos de la contraseña) se almacena en el archivo `/etc/shadow`. La creación de un nuevo usuario puede lograrse añadiendo una nueva línea manualmente a cada uno de estos archivos, pero generalmente no es la técnica recomendada. Mediante el uso de un comando adecuado para agregar un nuevo usuario, estos archivos pueden ser modificados automáticamente y de forma segura. Si fueras a modificar manualmente estos archivos, corres el riesgo de cometer un error que podría impedir el acceso normal de todos los usuarios.
+
+En algunas distribuciones, creando una nueva cuenta de usuario automáticamente se crea una cuenta de grupo para el usuario, llamado un **Grupo Privado de Usuario** (UPG, «User Private Group» en inglés). En estos sistemas, el grupo y nombre de usuario serían los mismos y el único miembro de este nuevo grupo sería el nuevo usuario.
+
+Para las distribuciones que no crean un UPG, los nuevos usuarios reciben el grupo de "users" («usuarios» en español) como su **grupo primario**. El administrador puede crear manualmente cuentas de grupo que sean privadas para el usuario, pero es más común que el administrador cree grupos para varios usuarios que deben colaborar. Las cuentas de usuario pueden ser modificadas en cualquier momento para agregar o quitar membresías de cuenta de grupo, pero los usuarios deben pertenecer por lo menos a un grupo para usarlo como su grupo primario.
+
+Antes de empezar a crear los usuarios, debes planear cómo vas a utilizar los grupos. Los usuarios pueden crearse con membresías en grupos que ya existen o los usuarios existentes pueden ser modificados para tener membresías en grupos existentes.
+
+Si ya tienes previsto qué usuarios y grupos quieres crear, es más eficiente primero crear sus grupos y después crear los usuarios con sus pertenencias a grupos. Por otra parte, si creas primero tus usuarios, y luego sus grupos, necesitarás un paso extra para modificar los usuarios para que sean miembros de sus grupos.
+
+> **¿Quién es LPI?** El Linux Professional Institute (o «Instituto Profesional de Linux» en español) es una organización comprometida en ayudar miembros de la comunidad de Linux y de código abierto, crecer en sus oportunidades profesionales, ofreciendo recursos profesionales y certificaciones de habilidades.
+
+## 14.2 Crear un Grupo
+
+La razón más común para crear un grupo es que los usuarios puedan compartir archivos. Un ejemplo de esto podría ser cuando hay varias personas trabajando juntas en el mismo proyecto y necesitan colaborar en documentos almacenados en archivos para el proyecto. En este escenario, el administrador puede hacer a estas personas miembros de un grupo común, cambiar la propiedad del directorio al nuevo grupo y establecer permisos en el directorio que sólo permitirá a los miembros del grupo acceder a los archivos.
+
+Después de crear o modificar un grupo, puedes verificar los cambios mediante la visualización de la información de configuración del grupo en el archivo `/etc/group` con el comando `grep`. Si trabajas con los servicios de autenticación de red, entonces el comando `getent` puede mostrar los grupos locales y en la red. Para uso local, estos comandos muestran el mismo resultado, en este caso para el grupo de `root`:
+
+```bash
+root@localhost:~# grep root /etc/group
+root:x:0:
+root@localhost:~# getent group root
+root:x:0:
+```
+
+El comando `groupadd` puede ser ejecutado por el usuario root para crear un nuevo grupo. El comando requiere solamente el nombre del grupo que se creará. La opción `-g` puede utilizarse para especificar un **id de grupo** (GID) para el grupo nuevo:
+
+```bash
+root@localhost:~# groupadd -g 506 research
+root@localhost:~# grep research /etc/group
+research:x:506:
+```
+
+Si no se proporciona la opción `-g`, el comando `groupadd` proporcionará automáticamente un GID para el grupo nuevo. Para lograr esto, el comando `groupadd` ve el archivo `/etc/group` y utiliza un número que es de un valor mayor que el mayor número GID actual. La ejecución de los comandos siguientes ilustra esto:
+
+```bash
+root@localhost:~# grep research /etc/group
+research:x:506:
+root@localhost:~# groupadd development
+root@localhost:~# grep development /etc/group
+development:x:507:
+```
+
+### 14.2.1 Consideraciones para el ID de Grupo
+
+En algunas distribuciones de Linux, particularmente las basadas en Red Hat, cuando se crea un **ID de usuario** (UID), también se crea un grupo privado de usuario (UPG) con ese usuario como único miembro. En estas distribuciones, el UID del usuario y el id de grupo privado deben coincidir (tener el mismo número).
+
+Por lo tanto, no debes crear los GIDs en los mismos rangos numéricos donde se espera crear identificadores de usuario (UIDs), con el fin de evitar un conflicto entre un GID creado frente a un número UPG que se crea para que coincida con un UID.
+
+Recuerda que los GID bajo 500 están reservados para uso del sistema. Puede haber ocasiones en las que quieras asignar un GID menor de 500. Para lograr esto, utiliza `-r`. La opción `-r` asignará un GID al nuevo grupo que será menor que el estándar más bajo de UID:
+
+```bash
+root@localhost:~# groupadd -r sales
+root@localhost:~# getent group sales
+sales:x:491:
+```
+
+### 14.2.2 Consideraciones para Nombrar un Grupo
+
+Seguir estas directrices para los nombres de grupo te ayudará a seleccionar un nombre de grupo que sea **portable** (funcione correctamente con otros sistemas o servicios):
+
+- El primer carácter del nombre debe ser un guión bajo `_` o un carácter alfabético en minúsculas `a-z`.
+- En la mayoría de las distribuciones de Linux se permite hasta 32 caracteres, pero usar más de 16 puede ser problemático, ya que algunas distribuciones no pueden aceptar más de 16.
+- Después del primer carácter, los caracteres restantes pueden ser alfanuméricos, un guión `-` o un guión bajo `_`.
+- El último carácter no debe ser un guión `-`.
+
+Lamentablemente estas pautas no se aplican siempre. El problema no es que el comando `groupadd` fracase, sino que otros comandos o servicios del sistema no funcionen correctamente.
+
+## 14.3 Modificar un Grupo
+
+El comando `groupmod` se puede utilizar para cambiar el nombre del grupo (con la opción `-n`) o cambiar el GID (con la opción `-g`) para el grupo.
+
+**ADVERTENCIA:** Cambiar el nombre del grupo puede causar confusión para los usuarios que estaban familiarizados con el antiguo nombre y no hayan sido informados del nombre nuevo. Sin embargo, cambiar el nombre del grupo no causará problemas con el acceso a los archivos, ya que los archivos son propiedad del GID, no de los nombres de grupo. Por ejemplo:
+
+```bash
+root@localhost:~# ls -l index.html
+-rw-r-----. 1 root sales 0 Aug  1 13:21 index.html
+root@localhost:~# groupmod -n clerks sales
+root@localhost:~# ls -l index.html
+-rw-r-----. 1 root clerks 0 Aug  1 13:21 index.html
+```
+
+Después del comando `groupmod` anterior, el archivo `index.html` tiene un nombre de propietario de grupo diferente. Sin embargo, todos los usuarios que estaban en el grupo `sales` están ahora en el grupo `clerks`, así pues, todos los usuarios aún pueden acceder el archivo `index.html`. Una vez más, esto es porque el grupo se define por el GID, no por el nombre del grupo.
+
+Por otro lado, si cambias el GID para un grupo, entonces todos los archivos que fueron asociados a ese grupo ya no estarán asociados a ese grupo. De hecho, todos los archivos que fueron asociados a ese grupo ya no estarán asociados con ningún nombre de grupo. Por el contrario, estos archivos serán propiedad de un GID solamente tal como se muestra a continuación:
+
+```bash
+root@localhost:~# groupmod -g 10003 clerks
+root@localhost:~# ls -l index.html
+-rw-r-----. 1 root 491 13370 Aug  1 13:21 index.html
+```
+
+Estos archivos sin nombre de grupo se denominan archivos «**huérfanos**». Como usuario root, probablemente quieras buscar todos los archivos que son propiedad de solamente un GID (no asociado con un nombre de grupo). Esto puede lograrse con la opción `-nogroup` para el comando `find`:
+
+```bash
+root@localhost:~# find / -nogroup
+/root/index.html
+```
+
+## 14.4 Eliminando un Grupo
+
+Si quieres eliminar un grupo con el comando `groupdel`, ten en cuenta que los archivos que pertenecen a ese grupo se convertirán en «huérfanos».
+
+Sólo se puede eliminar a los **grupos suplementarios**, por lo que si un grupo es el grupo primario para cualquier usuario, no se puede eliminar. El administrador puede modificar qué grupo es el grupo primario del usuario, por lo que un grupo que estaba siendo utilizado como un grupo primario se puede transformar en un grupo suplementario y luego se puede eliminar.
+
+Mientras que el grupo que se vaya a eliminar no sea el grupo principal del usuario, eliminar el grupo se logra mediante el comando `groupdel` junto con el nombre del grupo:
+
+```bash
+root@localhost:~# groupdel clerks
+```
+
+## 14.5 Archivo /etc/default/useradd
+
+Antes de empezar a crear los usuarios para el sistema, debes verificar o establecer los valores prácticos que se utilizarán por defecto con el comando `useradd`. Esto se puede lograr modificando la configuración en los archivos de configuración utilizados por el comando `useradd`.
+
+Asegurarse de que los valores en estos archivos de configuración sean razonables antes de agregar usuarios puede ayudarte a ahorrar tiempo y la molestia de tener que corregir la configuración de la cuenta de usuario después de agregar los usuarios.
+
+La opción `-D` del comando `useradd` te permitirá visualizar o modificar algunos de los valores por defecto utilizados por el comando `useradd`. Los valores indicados por `useradd -D` también pueden visualizarse o actualizar mediante la manipulación del archivo `/etc/default/useradd`:
+
+```bash
+root@localhost:~# useradd -D
+GROUP=100
+HOME=/home
+INACTIVE=-1
+EXPIRE=
+SHELL=/bin/bash
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+```
+
+La siguiente tabla describe cada uno de estos valores:
+
+| Campo | Ejemplo | Descripción |
+|---|---|---|
+| `GROUP` | 100 | En las distribuciones que no usan UPG, este será el **grupo principal** de forma predeterminada para un usuario nuevo, si no se ha especificado uno con el comando `useradd`. Este normalmente es el grupo de «users» con un GID de 100. Afecta la configuración por defecto de `/etc/passwd` (ej. `bob:x:600:600:bob:/home/bob:/bin/bash`). La opción `-g` de `useradd` permite utilizar un grupo principal diferente al predeterminado. |
+| `HOME` | `/home` | El directorio `/home` es el directorio base predeterminado, en el cual se creará un nuevo **directorio home** del usuario. Un usuario con nombre de cuenta `bob` tendría un directorio de `/home/bob`. Afecta `/etc/passwd`. La opción `-b` permite utilizar un directorio base diferente. |
+| `INACTIVE` | -1 | Número de días después de que caduca la contraseña hasta que la cuenta será deshabilitada. Un valor de -1 significa que esta función no está habilitada por defecto. Afecta `/etc/shadow` (ej. `bob:pw:15020:5:30:7:60:15050:`). La opción `-f` permite utilizar un valor `INACTIVE` diferente. |
+| `EXPIRE` | (vacío) | Por defecto no hay ningún valor para la **fecha de caducidad**. Generalmente se configura para una cuenta individual, no para todas las cuentas. Afecta `/etc/shadow`. La opción `-e` permite utilizar un valor `EXPIRE` diferente. |
+| `SHELL` | `/bin/bash` | Indica el **shell** por defecto para los usuarios al iniciar sesión. Afecta `/etc/passwd`. La opción `-s` permite utilizar un shell de inicio de sesión diferente. |
+| `SKEL` | `/etc/skel` | Determina qué directorio «**esqueleto**» tendrá su contenido copiado en el directorio home de los usuarios nuevos; el nuevo usuario recibe la propiedad de los nuevos archivos. La opción `-k` permite utilizar un directorio SKEL diferente (requiere usar también `-m`). |
+| `CREATE_MAIL_SPOOL` | yes | El «**mail spool**» («carrete de correo») es un archivo donde se coloca el correo entrante. Con `yes`, los usuarios quedan configurados por defecto con capacidad de recibir y guardar correo local. |
+
+Por ejemplo, si un contratista fue contratado para trabajar hasta el final del día 01 de noviembre de 2013, se podría asegurar que no pueda iniciar sesión después de esa fecha, utilizando el campo `EXPIRE`.
+
+Para modificar uno de los valores por defecto de `useradd`, el archivo `/etc/default/useradd` puede editarse con un editor de texto. Otra técnica (más segura) es usar el comando `useradd -D`.
+
+Por ejemplo, si quieres permitir a los usuarios con una contraseña caducada seguir iniciando la sesión con un máximo de treinta días, puedes ejecutar lo siguiente:
+
+```bash
+root@localhost:~# useradd -D -f 30
+root@localhost:~# useradd -D
+GROUP=100
+HOME=/home
+INACTIVE=30
+EXPIRE=
+SHELL=/bin/bash
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+```
+
+## 14.6 Archivo /etc/login.defs
+
+El archivo `/etc/login.defs` también contiene valores que se aplicarán por defecto a los nuevos usuarios que vayas a crear con el comando `useradd`. A diferencia de `/etc/default/useradd`, que puede ser actualizado con el comando `useradd -D`, el archivo `/etc/login.defs` generalmente lo edita directamente el administrador para modificar sus valores.
+
+Este archivo contiene muchos comentarios y líneas en blanco, así que si quieres ver las líneas que no son comentarios o líneas en blanco (la configuración actual), puedes utilizar el siguiente comando `grep`:
+
+```bash
+root@localhost:~#  grep -Ev '^#|^$' /etc/login.defs
+MAIL_DIR	/var/spool/mail
+PASS_MAX_DAYS	99999
+PASS_MIN_DAYS	0
+PASS_MIN_LEN	5
+PASS_WARN_AGE	7
+UID_MIN			  500
+UID_MAX			60000
+GID_MIN			  500
+GID_MAX			60000
+CREATE_HOME	yes
+UMASK           077
+USERGROUPS_ENAB yes
+ENCRYPT_METHOD SHA512
+MD5_CRYPT_ENAB no
+```
+
+El ejemplo anterior representa un típico archivo `/etc/login.defs` de la distribución CentOS 6 con sus valores. La siguiente tabla describe cada uno de estos valores:
+
+| Campo | Ejemplo | Descripción |
+|---|---|---|
+| `MAIL_DIR` | `/var/mail/spool` | El directorio en el que se crea el archivo mail spool del usuario. |
+| `PASS_MAX_DAYS` | 99999 | Número máximo de días en los que un usuario podrá utilizar la misma contraseña. Con el valor predeterminado de 99999 días (más de 200 años), los usuarios nunca tienen que cambiar su contraseña. Las organizaciones con políticas eficaces comúnmente cambian este valor a 60 o 30 días. Afecta `/etc/shadow`. |
+| `PASS_MIN_DAYS` | 0 | Tiempo más corto que un usuario tiene que mantener una contraseña antes de poder cambiarla; con 0, se puede cambiar inmediatamente. Si se estableciera en 3, el usuario tendría que esperar tres días antes de poder cambiarla otra vez. Afecta `/etc/shadow`. |
+| `PASS_MIN_LEN` | 5 | Número mínimo de caracteres que debe contener una contraseña. |
+| `PASS_WARN_AGE` | 7 | Valor predeterminado para el campo de advertencia; cuando un usuario se acerca al número máximo de días de uso de su contraseña, el sistema avisa al usuario durante el inicio de sesión. Afecta `/etc/shadow`. |
+| `UID_MIN` | 500 | Determina el primer **UID** que se asignará a un usuario ordinario. |
+| `UID_MAX` | 60000 | Un UID técnicamente podría tener un valor de más de 4 billones; para máxima compatibilidad se recomienda dejarlo en 60000. |
+| `GID_MIN` | 500 | Determina el primer **GID** que se asignará a un grupo ordinario. |
+| `GID_MAX` | 60000 | Igual que UID_MAX, para soportar UPG debe coincidir con el valor usado para UID_MAX. |
+| `CREATE_HOME` | yes | Determina si se crea o no un nuevo directorio home para el usuario al crear su cuenta. |
+| `UMASK` | 077 | Funciona en el momento de crear el directorio home del usuario y determina sus permisos predeterminados. Con 077, sólo el usuario propietario tendrá algún tipo de permiso para acceder a su directorio (**umask** se cubrirá en detalle en un capítulo posterior). |
+| `USERGROUPS_ENAB` | yes | En distribuciones con UPG por usuario tendrá valor `yes`; si no se usa UPG, tendrá valor `no`. |
+| `ENCRYPT_METHOD` | SHA512 | Método de cifrado usado para las contraseñas de usuarios en `/etc/shadow`. Anula la configuración de `MD5_CRYPT_ENAB`. |
+| `MD5_CRYPT_ENAB` | no | Ajuste obsoleto que originalmente permitía especificar el uso del cifrado MD5 en lugar de DES; reemplazado por `ENCRYPT_METHOD`. |
+
+## 14.7 Crear un Usuario
+
+Durante el proceso de instalación, la mayoría de los instaladores crean un usuario normal y ya sea da a este usuario el permiso para ejecutar comandos administrativos con `sudo` o bien requiere que se configure una contraseña de usuario root como parte del proceso de instalación. Esto significa que la mayoría de los sistemas Linux se configuran de tal manera que permitan que un usuario (no root) sin privilegios inicie sesión, y que tenga la capacidad de ejecutar los comandos como el usuario root, ya sea directa o indirectamente.
+
+Si la computadora se va a utilizar por sólo una persona, puede ser suficiente tener sólo una cuenta de usuario normal. Sin embargo, si una computadora debe de ser compartida por varias personas, entonces es bueno tener una cuenta separada para cada persona que la utiliza. Hay varias ventajas para los individuos si tienen sus propias cuentas separadas:
+
+- Las cuentas pueden utilizarse para conceder acceso selectivo a archivos o servicios. Por ejemplo, el usuario de cada cuenta tiene un directorio separado que generalmente no es accesible para otros usuarios.
+- El comando `sudo` se puede configurar para conceder la capacidad de ejecutar comandos administrativos selectos. Si los usuarios están obligados a utilizar el comando `sudo` para llevar a cabo los comandos administrativos, el sistema registra cuando los usuarios realizaron tales comandos.
+- Cada cuenta puede tener membresías de grupos y los derechos asociados con ellos, lo que permite una mayor flexibilidad de gestión.
+
+### 14.7.1 Consideraciones de la Cuenta
+
+Crear una cuenta de usuario para usarlo con un sistema Linux puede requerir que reúnas varias piezas de información. Mientras que todo lo que puede ser necesario es el nombre de la cuenta, probablemente quieras planificar el UID, el grupo principal, los grupos suplementarios, el directorio home, el esqueleto de directorio y el shell que vayas a utilizar. A la hora de planificar estos valores, considera lo siguiente:
+
+- **nombre de usuario**: El único argumento necesario para el comando `useradd` es el nombre que le quieras dar a la cuenta. Este nombre debe seguir las mismas pautas que vimos anteriormente en este capítulo para los nombres de grupo. Para resumir, debe tener 32 caracteres o menos, empezar con una letra en minúscula o un guión bajo y luego sólo debe contener letras minúsculas, números, guiones y guiones bajos. Si el usuario necesita tener acceso a múltiples sistemas, generalmente se recomienda que el nombre de la cuenta sea igual en esos sistemas. El nombre de la cuenta debe ser único para cada usuario.
+- **identificador de usuario (UID)**: Una vez creado un usuario con un UID específico, el sistema generalmente incrementará el UID solo por uno para el siguiente usuario que vayas a crear. Si estás conectado a una red con otros sistemas, probablemente quieras asegurarte que este UID sea el mismo en todos los sistemas para ayudar a proveer un acceso consistente. La opción `-u` para el comando `useradd` te permite especificar el número UID. Los UID por lo general pueden variar de cero a más de 4 mil millones, pero para mayor compatibilidad con los sistemas antiguos, el máximo valor recomendado para el UID es de 60,000.
+
+  Tal como habíamos visto previamente, el usuario root tiene un identificador de usuario (UID) de 0, lo que hace que la cuenta tenga privilegios especiales. Cualquier cuenta con un UID de cero actuaría como «administrador».
+
+  Las **cuentas del sistema** son las cuentas que generalmente se utilizan para ejecutar los servicios en segundo plano (llamados **daemons**). Al no tener los servicios ejecutados como usuario root, se limita la cantidad de daño que se puede hacer con una cuenta de servicio que ha sido comprometida. Las cuentas del sistema utilizadas por los servicios generalmente utilizarán los UID que están en el rango de «reservados». Una cuenta de sistema que es una excepción a esta regla es el usuario `nfsnobody`, que tiene un UID 65534.
+
+  El rango reservado utilizado para las cuentas de servicio se ha ampliado con el tiempo. Originalmente, era para los UID entre 1 y 99. La tendencia actual entre distribuciones es que las cuentas del sistema sean cualquier cuenta que tenga un UID entre 1 y 999, pero se sigue utilizando también el rango de 1-499.
+
+  Si estás configurando un nuevo sistema, es una buena práctica a empezar tus UID no inferiores a 1000. Esto también tiene la ventaja para asegurar que tendrás suficientes UID disponibles para muchos servicios del sistema y darte la habilidad de crear muchos GID en el rango «reservado».
+- **grupo primario**: En las distribuciones que utilizan UPG, este grupo se creará automáticamente con un GID y un nombre de grupo que coincida con el UID y el nombre de usuario de la cuenta de usuario recién creado. En las distribuciones que no usan UPG, el grupo primario normalmente por defecto es el grupo de «users» con un GID de 100. Para especificar un grupo primario con el comando `useradd`, utiliza la opción `-g` con el nombre o el GID del grupo.
+- **grupo(s) suplementario(s)**: Si quieres que el usuario fuera miembro de uno o más grupos suplementarios, la opción `-G` se puede utilizar para especificar una lista separada por comas de nombres de grupos o números.
+- **directorio home**: Por defecto, la mayoría de las distribuciones crearán el directorio home del usuario con el mismo nombre que la cuenta de usuario bajo `/home`. Por ejemplo, si creas una cuenta de usuario llamada `sam`, el nuevo directorio home del usuario sería `/home/sam`. Hay varias opciones para el comando `useradd` que pueden afectar la creación del directorio home del usuario:
+  - `-b`: te permite especificar un directorio diferente bajo el cual se creará el directorio home del usuario. Por ejemplo: `-b /test` resultaría en `/test/sam` siendo el directorio home para una cuenta de usuario llamada `sam`.
+  - `-d`: te permite especificar un directorio existente o un nuevo directorio para el usuario. Esto debe ser una ruta de acceso completa para el directorio home del usuario. Por ejemplo: `-d /home/sam`.
+  - `-m`: le dice a `useradd` que cree el directorio home; esto no es normalmente necesario ya que es el comportamiento predeterminado del comando `useradd`. Sin embargo, cuando utilices la opción `-k` para especificar un esqueleto de directorio diferente, entonces necesitarás la opción `-m`.
+  - `-M`: se utiliza para especificarle al comando `useradd` que no debe crear el directorio home.
+- **esqueleto de directorio**: De forma predeterminada, el contenido del directorio `/etc/skel` se copia en el directorio home del usuario nuevo. Los archivos resultantes también son propiedad del nuevo usuario. Usando la opción `-k` con el comando `useradd`, el contenido de un directorio diferente se puede utilizar para rellenar el directorio home de un usuario nuevo. Cuando se especifica el directorio esqueleto con la opción `-k`, debe utilizarse la opción `-m`, de lo contrario el comando `useradd` fallará mostrando un error que dice: «`-k flag is only allowed with the -m flag`» (o «La opción -k solo se permite con la opción -m» en español).
+- **shell**: Mientras el shell por defecto se especifica en el archivo `/etc/default/useradd`, también puede ser cambiado con la opción `useradd -s` en el momento de la creación de cuentas. Más tarde, el administrador puede usar la opción `usermod -s` para cambiar el shell o el usuario puede cambiar su shell con el comando `chsh`. Es común especificar el shell `/sbin/nologin` para las cuentas que se vayan a utilizar como cuentas del sistema.
+- **comentario**: El campo de comentario, originalmente llamado el campo **General Electric Comprehensive Operating System (GECOS)**, normalmente se utiliza para contener el nombre completo del usuario. Muchos programas gráficos muestran el valor de este campo en lugar del nombre de la cuenta. La opción `-c` de los comandos `useradd` y `usermod` permite especificar el valor de este campo.
+
+### 14.7.2 El Comando useradd
+
+Una vez hayas comprobado qué valores se utilizarán por defecto y hayas reunido la información sobre el usuario, entonces estás listo para crear una cuenta de usuario. Un ejemplo de un comando `useradd` usando algunas opciones sería el siguiente:
+
+```bash
+root@localhost:~# useradd -u 1000 -g users -G wheel,research -c 'Jane Doe' jane
+```
+
+Este ejemplo del comando `useradd` crea un usuario con UID de 1000, un grupo primario de `users`, membresías suplementarias en los grupos `wheel` y `research`, un comentario de «Jane Doe» y un nombre de cuenta `jane`.
+
+La información sobre la cuenta de usuario de `jane` se agregará automáticamente a los archivos `/etc/passwd` y `/etc/shadow`, mientras que la información sobre el acceso a grupos suplementarios de `jane` se añadirá automáticamente al archivo `/etc/group` y `/etc/gshadow`. Por ejemplo:
+
+```bash
+root@localhost:~# useradd -u 1000 -g users -G wheel,research -c "Jane Doe" jane
+root@localhost:~# grep jane /etc/passwd
+jane:x:1000:100:Jane Doe:/home/jane:/bin/bash
+root@localhost:~# grep jane /etc/shadow
+jane:!!:16003:0:99999:7:::
+root@localhost:~# grep jane /etc/group
+wheel:x:10:jane
+research:x:2000:jane
+root@localhost:~# grep jane /etc/gshadow
+wheel:::jane
+research:!::jane
+root@localhost:~#
+```
+
+Ten en cuenta que la cuenta aún no tiene una contraseña válida.
+
+Además, se crearía el archivo mail spool `/var/spool/mail/jane`, el directorio `/home/jane` se crearía con permisos de sólo permitir el acceso al usuario `jane` y el contenido del directorio `/etc/skel` se copiaría en el directorio:
+
+```bash
+root@localhost:~# ls /var/spool/mail
+jane root rpc sysadmin
+root@localhost:~# ls /home
+jane sysadmin
+root@localhost:~# ls -a /home/jane
+.  ..  .bash_logout  .bashrc  .profile  .selected_editor
+root@localhost:~# ls -a /etc/skel
+.  ..  .bash_logout  .bashrc  .profile  .selected_editor
+root@localhost:~#
+```
+
+## 14.8 Elegir una Contraseña
+
+Elegir una buena **contraseña** no es una tarea fácil, pero es fundamental que se haga correctamente, ya que la seguridad de una cuenta (tal vez todo el sistema) puede verse comprometida. Escoger una buena contraseña es únicamente un comienzo; tienes que ser cuidadoso con tu contraseña para que otras personas no la puedan ver. Nunca debes decir a nadie tu contraseña y nunca dejes que alguien te vea escribir tu contraseña. Si quieres apuntar tu contraseña, entonces la debes guardar en un lugar seguro como una caja fuerte.
+
+¡Es fácil crear una mala contraseña! Si utilizas cualquier información en tu contraseña que tenga que ver contigo, entonces otras personas pueden llegar a conocerla o descubrir tal información, por lo tanto tu contraseña podría verse fácilmente comprometida. Tu contraseña nunca debe contener información sobre ti o alguien que conoces, tales como:
+
+- nombre
+- segundo nombre
+- apellido
+- cumpleaños
+- teléfono
+- nombres de mascotas
+- licencia de conducir
+- seguro social
+
+Hay numerosos factores a considerar al elegir una contraseña para una cuenta:
+
+- **Longitud**: El archivo `/etc/login.defs` permite al administrador especificar la longitud mínima de la contraseña. Aunque hay personas que consideran que una contraseña larga es mejor, esto no es realmente correcto. El problema con las contraseñas que son demasiado largas es que no se recuerdan fácilmente y, consecuentemente, la gente las apunta a menudo en un lugar donde pueden ser fácilmente encontradas y comprometidas.
+- **Composición**: Una buena contraseña debe estar compuesta por una combinación de caracteres alfabéticos, numéricos y simbólicos.
+- **Vigencia**: La cantidad de tiempo que una contraseña se puede utilizar como máximo debe ser limitada por varias razones:
+  - Si una cuenta está comprometida y se limita el tiempo que la contraseña es válida, el intruso perderá el acceso puesto que eventualmente la contraseña se volverá invalidada.
+  - Si una cuenta no se usa, entonces se puede desactivar automáticamente cuando la contraseña no sea válida.
+  - Si los atacantes intentan atacar con «**fuerza bruta**» con cada contraseña posible, entonces la contraseña puede cambiarse antes de que el ataque tenga éxito.
+
+  Sin embargo, el hecho de requerir a un usuario que cambie su contraseña a menudo podría plantear problemas de seguridad, incluyendo:
+  - La calidad de la contraseña que el usuario elija, podría ser inferior.
+  - El usuario puede empezar a apuntar su contraseña en papel, lo que aumenta la posibilidad de que la contraseña sea descubierta.
+  - Las cuentas de usuario rara vez utilizadas se pueden caducar y requerir atención administrativa para reiniciar.
+
+  Las opiniones varían sobre la frecuencia con la que los usuarios deben ser forzados a cambiar sus contraseñas. Para cuentas muy sensibles, se recomienda cambiar las contraseñas con mayor frecuencia, como cada 30 días. Por otro lado, para cuentas no críticas sin ningún tipo de acceso a información sensible, hay menos necesidad de cambio frecuente. Para cuentas con mínimo riesgo, una vigencia razonable sería 90 días.
+
+## 14.9 Establecer una Contraseña de Usuario
+
+Existen varias formas de cambiar una contraseña de usuario: el usuario puede ejecutar el comando `passwd`, el administrador puede ejecutar el comando `passwd` proporcionando el nombre de usuario como argumento y las herramientas gráficas también están disponibles.
+
+El administrador puede utilizar el comando `passwd` para cambiar la contraseña de la cuenta o establecer una contraseña inicial. Por ejemplo, si el administrador hubiera creado la cuenta `jane`, entonces ejecutando `passwd jane` proporcionaría al administrador un prompt para configurar la contraseña para `jane`. Si se completa con éxito, el archivo `/etc/shadow` se actualizará con la nueva contraseña del usuario.
+
+Mientras que los usuarios regulares deben seguir muchas reglas de contraseña, el usuario root solo debe seguir una regla: la contraseña no se puede dejar en blanco. Todas otras reglas de contraseña que el usuario root no cumpla, simplemente resultarán en una advertencia que se imprime a la pantalla y la regla no se aplica:
+
+```bash
+root@localhost:~# passwd jane
+Enter new UNIX password:
+BAD PASSWORD: it is WAY to short
+BAD PASSWORD: is too simple
+Retype new UNIX password:
+passwd: password updated successfully
+root@localhost:~#
+```
+
+Suponiendo que el administrador estableció una contraseña para una cuenta de usuario, el usuario puede entonces iniciar sesión con el nombre de cuenta y la contraseña. Cuando el usuario abre una terminal, puede ejecutar el comando `passwd` sin argumentos para cambiar su propia contraseña. Se le pide su contraseña actual y luego se pedirá que introduzca la nueva contraseña dos veces.
+
+Para un usuario común puede ser difícil establecer una contraseña válida, porque debe seguir todas las reglas para la contraseña. El usuario normalmente tiene tres intentos para proporcionar una contraseña válida antes de que el comando `passwd` salga con un error.
+
+Con los privilegios del usuario root, las contraseñas encriptadas y otra información relacionada a la contraseña puede verse consultando el archivo `/etc/shadow`. Hay que recordar que los usuarios normales no pueden ver el contenido de este archivo.
+
+## 14.10 Usando el Comando chage
+
+Aunque no aparezca como un comando que deber saber según los objetivos del curso, el comando `chage` ofrece muchas opciones para la gestión de la información de vencimiento de contraseña que se encuentra en el archivo `/etc/shadow`.
+
+Aquí está un resumen de las opciones de `chage`:
+
+| Opción corta | Opción larga | Descripción |
+|---|---|---|
+| `-l` | `--list` | Listar la información de vencimiento de la cuenta |
+| `-d LAST_DAY` | `--lastday LAST_DAY` | Fijar la fecha del último cambio de contraseña a `LAST_DAY` |
+| `-E EXPIRE_DATE` | `--expiredate EXPIRE_DATE` | Configurar cuenta para que expire el `EXPIRE_DATE` |
+| `-h` | `--help` | Mostrar la ayuda para `chage` |
+| `-I INACTIVE` | `--inactive INACTIVE` | Configurar la cuenta para permitir acceso `INACTIVE` días después de que la contraseña caduque |
+| `-m MIN_DAYS` | `--mindays MIN_DAYS` | Definir el número mínimo de días antes de que se pueda cambiar la contraseña a `MIN_DAYS` |
+| `-M MAX_DAYS` | `--maxdays MAX_DAYS` | Definir el número máximo de días antes de que se pueda cambiar la contraseña a `MAX_DAYS` |
+| `-W WARN_DAYS` | `--warndays WARN_DAYS` | Establecer el número de días antes de que caduque una contraseña para mostrar una advertencia a `WARN_DAYS` |
+
+Un buen ejemplo del comando `chage` sería cambiar el número máximo de días para la validez de la contraseña de una persona a 60 días:
+
+```bash
+root@localhost:~# chage -M 60 jane
+```
+
+## 14.11 Modificar un Usuario
+
+Antes de hacer cambios a una cuenta de usuario, debes entender que algunos comandos no modificarán con éxito una cuenta de usuario si el usuario está actualmente conectado (como por ejemplo cambiando su nombre de usuario del inicio de la sesión).
+
+Otros cambios que podrías hacer no serán efectivos si el usuario está conectado, sino será efectivo tan pronto como el usuario cierre sesión y luego inicie sesión de nuevo. Por ejemplo, si vas a modificar las membresías de los grupos, entonces las nuevas membresías estarán disponibles para el usuario hasta la próxima vez que el usuario inicie sesión.
+
+En cualquier caso, es útil saber cómo utilizar los comandos `who`, `w` y `last`, para que puedas saber quién está conectado en el sistema, ya que esto puede afectar los cambios que quieres hacer a un usuario.
+
+Los comandos `who` y `w` los vimos en el capítulo anterior. Ambos comandos te permiten ver quién está actualmente conectado en el sistema. El comando `w` es el más detallado de los dos, ya que muestra información de tiempo de actividad y carga del sistema, así como qué procesos está ejecutando cada usuario.
+
+El comando `last` es ligeramente diferente de los comandos `who` y `w`. Por defecto, también muestra el nombre de usuario, terminal y ubicación del inicio de la sesión, no sólo de las sesiones actuales iniciadas en el sistema, sino las sesiones anteriores también. A diferencia de los comandos `who` y `w`, mostrará la fecha y hora en la que el usuario inició la sesión. Si el usuario cerró la sesión del sistema, entonces se mostrará el tiempo total de conexión o se mostrará "still logged in" (o «sigue conectado» en español).
+
+El comando `last` lee la historia completa de la sesión desde el archivo `/var/log/wtmp` y muestra todos los inicios de sesión y los reinicios por defecto. Un detalle interesante de los registros de reinicio es que se muestra la versión del kernel Linux que fue arrancado en lugar de la ubicación del inicio de la sesión.
+
+Proporcionando un nombre de usuario o un nombre de tty (terminal) como argumento, el comando sólo mostrará los registros que coincidan con ese nombre. Si necesitas averiguar quién se conectó a partir de una determinada fecha y hora, el comando `last` lo puede mostrar, si utilizas la opción `-t` para especificar tal fecha y hora.
+
+### 14.11.1 El Comando usermod
+
+El comando `usermod` ofrece muchas opciones para modificar una cuenta de usuario existente. Observa que la mayoría de estas opciones también están disponible con el comando `useradd` en el momento de crear la cuenta. La siguiente tabla proporciona un resumen de las opciones `usermod`:
+
+| Opción corta | Opción larga | Descripción |
+|---|---|---|
+| `-c` | `COMMENT` | Establecer el valor del campo GECOS o comentario a `COMMENT`. |
+| `-d HOME_DIR` | `--home HOME_DIR` | Establecer un nuevo directorio home para el usuario. |
+| `-e EXPIRE_DATE` | `--expiredate EXPIRE_DATE` | Configurar la fecha de caducidad de la cuenta a `EXPIRE_DATE`. |
+| `-f INACTIVE` | `--inactive INACTIVE` | Configurar la cuenta para permitir acceso `INACTIVE` días después de que la contraseña caduque. |
+| `-g GROUP` | `--gid GROUP` | Establecer `GROUP` como grupo primario. |
+| `-G GROUPS` | `--groups GROUPS` | Establecer grupos adicionales a una lista especificada en `GROUPS`. |
+| `-a` | `--append` | Añadir grupos adicionales del usuario especificados por `-G`. |
+| `-h` | `--help` | Mostrar la ayuda para `usermod`. |
+| `-l NEW_LOGIN` | `--login NEW_LOGIN` | Cambiar el nombre de inicio de sesión del usuario. |
+| `-L` | `--lock` | Bloquear la cuenta de usuario. |
+| `-s SHELL` | `--shell SHELL` | Especificar el shell de inicio de sesión para la cuenta. |
+| `-u NEW_UID` | `--uid NEW_UID` | Especificar que el UID del usuario sea `NEW_UID`. |
+| `-U` | `--unlock` | Desbloquear la cuenta de usuario. |
+
+Varias de estas opciones son importantes debido a la forma en la que afectan la administración de usuarios. Puede ser muy complicado cambiar el UID del usuario con la opción `-u`, ya que los archivos pertenecientes al usuario quedarán huérfanos. Por otra parte, especificando un nuevo nombre de inicio de sesión para el usuario con la opción `-l` no resulta en archivos huérfanos.
+
+Borrar un usuario con el comando `userdel` (véase la sección siguiente) puede resultar en archivos huérfanos o eliminados del usuario del sistema. En vez de eliminar la cuenta, otra opción es **bloquear** la cuenta con la opción `-L` del comando `usermod`. El bloqueo de una cuenta evita que la cuenta se utilice, pero sigue siendo propietario de los archivos.
+
+Hay algunas cosas importantes que debes saber sobre el manejo de los grupos suplementarios. Si utilizas la opción `-G` sin la opción `-a`, debes listar todos los grupos a los que perteneciera el usuario. Usando solamente la opción `-G` puede accidentalmente quitar un usuario de todos los anteriores grupos suplementarios a los que pertenece.
+
+Si utilizas la opción `-a` sin la opción `-G`, solamente tienes que listar los grupos nuevos a los que perteneciera el usuario. Por ejemplo, si el usuario `jane` pertenece actualmente a los grupos `wheel` y `research`, entonces para agregar su cuenta al grupo de `development`, ejecuta el siguiente comando:
+
+```bash
+root@localhost:~# usermod -aG development jane
+```
+
+## 14.12 Eliminar a un Usuario
+
+Cuando eliminas una cuenta de usuario, también necesitas decidir si quieres eliminar el directorio home del usuario. Los archivos del usuario pueden ser importantes para tu organización, e incluso, puede que existan requisitos legales para mantener los datos durante un cierto periodo de tiempo, así que ten cuidado de no tomar esta decisión a la ligera. También, a menos que hayas hecho copias de seguridad de los datos, una vez que ejecutes el comando para borrar al usuario y sus archivos, tal acción no se puede revertir.
+
+Para eliminar al usuario `jane` sin eliminar el directorio home del usuario (`/home/jane`) se puede ejecutar:
+
+```bash
+root@localhost:~# userdel jane
+```
+
+Ten en cuenta que borrar un usuario sin borrar su directorio home significa que los archivos del directorio home del usuario son ahora huérfanos y estos archivos serán propiedad únicamente de sus previos UID y GID.
+
+Para eliminar al usuario `jane` y borrar el directorio `/home/jane`, utiliza la opción `-r`:
+
+```bash
+root@localhost:~# userdel -r jane
+```
+
+**ADVERTENCIA:** El comando anterior solo borra los archivos del usuario en su directorio home y mail spool. Si el usuario posee otros archivos fuera de su directorio, los archivos seguirán existiendo como archivos huérfanos.
+
+### Resumen del capítulo
+
+- La información de cuentas se gestiona con comandos dedicados (`groupadd`, `useradd`, `usermod`, `userdel`, `groupmod`, `groupdel`) en lugar de editar manualmente `/etc/passwd`, `/etc/shadow` y `/etc/group`, para evitar errores que dejen el sistema inaccesible.
+- Los archivos `/etc/default/useradd` y `/etc/login.defs` controlan los valores predeterminados (grupo, home, shell, vencimiento de contraseñas, rangos de UID/GID) aplicados a los nuevos usuarios creados con `useradd`.
+- Los grupos y usuarios se identifican internamente por GID y UID, no por su nombre; renombrar un grupo no afecta el acceso a archivos, pero cambiar su GID convierte los archivos asociados en «huérfanos».
+- Crear una cuenta de usuario implica planificar el UID, grupo primario, grupos suplementarios, directorio home, directorio esqueleto (`/etc/skel`) y shell; el comando `useradd` automatiza la creación de estos elementos.
+- Elegir y gestionar contraseñas seguras (longitud, composición, vigencia) es esencial para la seguridad; el comando `passwd` las establece o cambia y `chage` gestiona en detalle su vencimiento.
+- Eliminar (`userdel`) o bloquear (`usermod -L`) una cuenta son formas distintas de retirar el acceso de un usuario, cada una con distintas implicaciones sobre la propiedad de sus archivos.

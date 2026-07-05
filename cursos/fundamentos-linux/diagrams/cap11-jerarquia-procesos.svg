@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 260" font-family="Helvetica Neue, Arial, sans-serif">
+  <title>Árbol de jerarquía de procesos en Linux</title>
+  <defs>
+    <marker id="arrow11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a6a7a"/>
+    </marker>
+  </defs>
+  <rect width="780" height="260" fill="#ffffff"/>
+  <text x="390" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Árbol de jerarquía de procesos (padre → hijo)</text>
+
+  <!-- connecting lines root -> L2 -->
+  <line x1="390" y1="70" x2="110" y2="100" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow11)"/>
+  <line x1="390" y1="70" x2="250" y2="100" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow11)"/>
+  <line x1="390" y1="70" x2="410" y2="100" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow11)"/>
+  <line x1="390" y1="70" x2="610" y2="100" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow11)"/>
+
+  <!-- root -->
+  <rect x="280" y="30" width="220" height="40" rx="8" fill="#1a4d8b" stroke="#123a68" stroke-width="1.5"/>
+  <text x="390" y="55" text-anchor="middle" font-size="12.5" fill="#ffffff" font-family="SFMono-Regular, Menlo, Consolas, monospace">init / systemd (PID 1)</text>
+
+  <!-- L2 -->
+  <rect x="55" y="100" width="110" height="38" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="110" y="124" text-anchor="middle" font-size="12" fill="#1a4d8b" font-family="SFMono-Regular, Menlo, Consolas, monospace">sshd</text>
+
+  <rect x="195" y="100" width="110" height="38" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="250" y="124" text-anchor="middle" font-size="12" fill="#1a4d8b" font-family="SFMono-Regular, Menlo, Consolas, monospace">cron</text>
+
+  <rect x="330" y="100" width="160" height="38" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="410" y="124" text-anchor="middle" font-size="12" fill="#1a4d8b">bash (shell de login)</text>
+
+  <rect x="540" y="100" width="140" height="38" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="610" y="124" text-anchor="middle" font-size="12" fill="#1a4d8b" font-family="SFMono-Regular, Menlo, Consolas, monospace">apache2 / httpd</text>
+
+  <!-- L3 children of bash -->
+  <line x1="410" y1="138" x2="360" y2="180" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow11)"/>
+  <line x1="410" y1="138" x2="480" y2="180" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow11)"/>
+
+  <rect x="310" y="180" width="100" height="38" rx="8" fill="#f5f5f5" stroke="#888888" stroke-width="1.5"/>
+  <text x="360" y="204" text-anchor="middle" font-size="12" fill="#444444" font-family="SFMono-Regular, Menlo, Consolas, monospace">vim</text>
+
+  <rect x="420" y="180" width="140" height="38" rx="8" fill="#f5f5f5" stroke="#888888" stroke-width="1.5"/>
+  <text x="490" y="204" text-anchor="middle" font-size="12" fill="#444444" font-family="SFMono-Regular, Menlo, Consolas, monospace">ps aux</text>
+
+  <text x="390" y="245" text-anchor="middle" font-size="10.5" font-style="italic" fill="#666666">Cada proceso (excepto PID 1) tiene un PID de proceso padre (PPID); si el padre termina, systemd/init "adopta" al huérfano.</text>
+</svg>

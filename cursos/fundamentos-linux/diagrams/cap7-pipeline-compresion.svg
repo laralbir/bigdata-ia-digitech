@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" font-family="Helvetica Neue, Arial, sans-serif">
+  <title>Pipeline de empaquetado y compresión: tar+gzip frente a zip</title>
+  <defs>
+    <marker id="arrow7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a6a7a"/>
+    </marker>
+  </defs>
+  <rect width="800" height="320" fill="#ffffff"/>
+  <text x="400" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Empaquetado y compresión: tar + gzip frente a zip</text>
+
+  <!-- Row A -->
+  <rect x="20" y="45" width="150" height="90" rx="8" fill="#f5f5f5" stroke="#888888" stroke-width="1.5"/>
+  <text x="95" y="70" text-anchor="middle" font-size="11.5" fill="#444444">📄 archivo1.txt</text>
+  <text x="95" y="90" text-anchor="middle" font-size="11.5" fill="#444444">📄 archivo2.txt</text>
+  <text x="95" y="110" text-anchor="middle" font-size="11.5" fill="#444444">📁 carpeta/</text>
+  <text x="95" y="128" text-anchor="middle" font-size="10" font-style="italic" fill="#888888">(entrada)</text>
+
+  <line x1="170" y1="90" x2="205" y2="90" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow7)"/>
+
+  <rect x="205" y="60" width="90" height="60" rx="8" fill="#1a4d8b" stroke="#123a68" stroke-width="1.5"/>
+  <text x="250" y="86" text-anchor="middle" font-size="13" fill="#ffffff" font-family="SFMono-Regular, Menlo, Consolas, monospace">tar</text>
+  <text x="250" y="102" text-anchor="middle" font-size="10" fill="#dbe7f6">empaqueta</text>
+
+  <line x1="295" y1="90" x2="330" y2="90" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow7)"/>
+
+  <rect x="330" y="70" width="130" height="40" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="395" y="95" text-anchor="middle" font-size="12" fill="#1a4d8b">📦 paquete.tar</text>
+
+  <line x1="460" y1="90" x2="495" y2="90" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow7)"/>
+
+  <rect x="495" y="60" width="90" height="60" rx="8" fill="#1a4d8b" stroke="#123a68" stroke-width="1.5"/>
+  <text x="540" y="86" text-anchor="middle" font-size="13" fill="#ffffff" font-family="SFMono-Regular, Menlo, Consolas, monospace">gzip</text>
+  <text x="540" y="102" text-anchor="middle" font-size="10" fill="#dbe7f6">comprime</text>
+
+  <line x1="585" y1="90" x2="620" y2="90" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow7)"/>
+
+  <rect x="620" y="70" width="150" height="40" rx="8" fill="#eaf1fb" stroke="#1a4d8b" stroke-width="1.5"/>
+  <text x="695" y="95" text-anchor="middle" font-size="12" fill="#1a4d8b">🗜️ paquete.tar.gz</text>
+
+  <text x="400" y="150" text-anchor="middle" font-size="11" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">tar -czvf paquete.tar.gz archivo1.txt archivo2.txt carpeta/</text>
+
+  <!-- divider -->
+  <line x1="20" y1="175" x2="780" y2="175" stroke="#dddddd" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Row B -->
+  <rect x="20" y="195" width="150" height="70" rx="8" fill="#f5f5f5" stroke="#888888" stroke-width="1.5"/>
+  <text x="95" y="222" text-anchor="middle" font-size="11.5" fill="#444444">(mismos archivos</text>
+  <text x="95" y="238" text-anchor="middle" font-size="11.5" fill="#444444">y carpetas)</text>
+
+  <line x1="170" y1="230" x2="205" y2="230" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow7)"/>
+
+  <rect x="205" y="200" width="90" height="60" rx="8" fill="#2e7d32" stroke="#1e5a22" stroke-width="1.5"/>
+  <text x="250" y="222" text-anchor="middle" font-size="13" fill="#ffffff" font-family="SFMono-Regular, Menlo, Consolas, monospace">zip</text>
+  <text x="250" y="238" text-anchor="middle" font-size="9" fill="#d7ecd8">empaqueta</text>
+  <text x="250" y="249" text-anchor="middle" font-size="9" fill="#d7ecd8">y comprime</text>
+
+  <line x1="295" y1="230" x2="330" y2="230" stroke="#5a6a7a" stroke-width="1.5" marker-end="url(#arrow7)"/>
+
+  <rect x="330" y="210" width="130" height="40" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="395" y="235" text-anchor="middle" font-size="12" fill="#215a26">🗜️ paquete.zip</text>
+
+  <text x="400" y="285" text-anchor="middle" font-size="11" fill="#666666" font-family="SFMono-Regular, Menlo, Consolas, monospace">zip -r paquete.zip archivo1.txt archivo2.txt carpeta/</text>
+
+  <text x="400" y="308" text-anchor="middle" font-size="10.5" font-style="italic" fill="#666666">A diferencia de tar+gzip (dos pasos), zip empaqueta y comprime en una sola operación.</text>
+</svg>

@@ -1,0 +1,631 @@
+# Capítulo 12: Fundamentos de Redes
+
+## 12.1 Introducción
+
+Tener acceso a la **red** es una característica clave de la mayoría de los sistemas Linux. Los usuarios quieren navegar por la red, enviar y recibir correo electrónico e intercambiar archivos con otros usuarios.
+
+Normalmente los programas que realizan estas funciones (navegadores, clientes de correo electrónico, etc.) son bastante fáciles de usar. Sin embargo, cuentan con una característica importante: la capacidad de que tu computadora se comunique con otro equipo. Para tener esta comunicación, necesitas saber cómo configurar la red de tu sistema.
+
+Linux te proporciona varias herramientas tanto para configurar tu red, como para supervisar su rendimiento. En este capítulo aprenderás a utilizar ambas herramientas basadas en GUI, así como las herramientas de línea de comandos.
+
+> ¿Principales ventajas de ser un profesional de Linux? Horarios de trabajo flexibles, teletrabajo, incrementos de salario por arriba de la norma de la compañía, bonos más grandes.
+
+## 12.2 La Terminología Básica de la Red
+
+Antes de configurar una red o acceder a una red existente, es importante conocer algunos términos que están relacionados con las redes. Esta sección explora los términos que debes tener en cuenta. Algunos de los términos son básicos y probablemente ya los conoces, sin embargo otros son más avanzados.
+
+- **Host**: un host es básicamente una computadora. Sin embargo, muchas personas tienen una idea más limitada de lo que es una computadora (como una computadora de escritorio o una portátil). En realidad, muchos otros dispositivos también son computadoras, tales como teléfonos celulares, reproductores de música digitales y muchas televisiones modernas. En términos de redes, un host es cualquier dispositivo que se comunica con otro dispositivo.
+- **Red**: una red es una colección de dos o más hosts (computadoras) que son capaces de comunicarse entre sí. Esta comunicación puede ser a través de una conexión cableada o inalámbrica.
+- **Internet**: el Internet es un ejemplo de una red. Consiste en una red accesible públicamente que conecta millones de hosts en todo el mundo. Mucha gente utiliza el Internet para navegar por páginas web y enviar y recibir correo electrónico, pero el Internet tiene muchas funciones adicionales además de estas actividades.
+- **Wi-Fi**: el término Wi-Fi se refiere a las redes inalámbricas.
+- **Servidor**: un host que proporciona un servicio a otro host o cliente se denomina servidor. Por ejemplo, un servidor web almacena, procesa y entrega páginas web. Un servidor de correo recibe correo entrante y entrega correo saliente.
+- **Servicio**: una característica que se presta desde un host es un servicio. Un ejemplo de un servicio sería cuando un host proporciona páginas web a otro host.
+- **Cliente**: un cliente es un host que está accediendo a un servidor. Cuando se trabaja en un equipo navegando por Internet, eres un host cliente.
+- **Router** (también llamado **gateway** o «puerta de enlace»): es una máquina que conecta hosts de una red a otra red. Por ejemplo, si trabajas en un entorno de oficina, las computadoras dentro de la empresa pueden comunicarse todas vía la red local creada por los administradores. Para acceder a Internet, los equipos tienen que comunicarse con un router que se utiliza para reenviar las comunicaciones de red a Internet. Normalmente, cuando te comunicas en una red amplia (como Internet), hay varios routers que se utilizan antes de que tu comunicación llegue a su destino final.
+
+## 12.3 Terminología de las Funciones de Redes
+
+Además de los términos de redes mencionados en la sección anterior, hay algunos términos adicionales que debes conocer. Estos términos se centran más en los diferentes tipos de servicios de redes que se utilizan, así como algunas de las técnicas que se utilizan para la comunicación entre las máquinas.
+
+- **Paquete de red**: se utiliza para enviar la comunicación de red entre los hosts. Rompiendo la comunicación en trozos más pequeños (paquetes), el método de entrega de datos es mucho más eficiente.
+- **Dirección IP**: una Dirección de Protocolo de Internet (**IP**, «Internet Protocol») es un número único asignado a un host en una red. Los hosts utilizan estos números para «dirigir» una comunicación de red.
+- **Máscara de red** (también llamada **netmask** o máscara): es un sistema numérico que puede utilizarse para definir cuáles de las direcciones IP se consideran dentro de una única red. Debido a cómo los routers desempeñan sus funciones, las redes tienen que ser definidas claramente.
+- **Nombre de host**: cada host en una red puede tener su propio nombre de host. Esto le facilita a los usuarios dirigir los paquetes de red a otro host, ya que para los usuarios es más fácil recordar nombres que números. Los nombres de host se traducen a direcciones IP antes de enviar el paquete de red en la red.
+- **DHCP**: a los hosts se les puede asignar nombres de host, direcciones IP y otra información relacionada con la red por un servidor **DHCP** (Dynamic Host Configuration Protocol o «Protocolo de Configuración Dinámica de Host»). Un **protocolo** es un conjunto de reglas bien definido. DHCP define cómo se asigna la información de red a los clientes host y el servidor DHCP es la máquina que proporciona esta información.
+- **DNS**: como ya se mencionó, los nombres de host se traducen a direcciones IP antes de enviar el paquete en la red, lo que significa que tu host necesita conocer la dirección IP de todos los otros hosts con los cuales te comunicas. Un servidor **DNS** (Domain Name Server) proporciona el servicio de traducción de los nombres de dominio en direcciones IP.
+- **Ethernet**: en un entorno de red por cable, Ethernet es la forma más común para conectar físicamente los hosts en una red. Los cables de Ethernet están conectados a las tarjetas de red que soportan las conexiones Ethernet. Los cables de Ethernet y los dispositivos (como routers) están diseñados para soportar diferentes velocidades de comunicación, siendo la más baja de 10 Mbps (10 Megabits por segundo) y la máxima 100 Gbps (100 gigabits por segundo). Las velocidades más comunes son de 100 Mbps y 1 Gbps.
+- **TCP/IP**: Transmission Control Protocol/Internet Protocol («Protocolo de Control de Transmisión/Protocolo de Internet») es un nombre de adorno para una colección de protocolos que se utilizan para definir cómo debe ocurrir la comunicación de la red entre los hosts. Aunque no es la única colección de protocolos utilizada para definir la comunicación de la red, es la más utilizada. Por ejemplo, TCP/IP incluye la definición de cómo funcionan las direcciones IP y máscaras de red.
+
+## 12.4 Las Direcciones IP
+
+Como se mencionó anteriormente, los hosts «dirigen» paquetes de red usando la dirección IP de la máquina de destino. El paquete de red también incluye un «remitente», la dirección IP de la máquina origen.
+
+De hecho, hay dos tipos de direcciones IP: **IPv4** e **IPv6**.
+
+En una dirección **IPv4** (IP versión 4), un total de cuatro números de 8 bits (8 bits = números del 0 al 255) se utilizan para definir la dirección. Por ejemplo: `192.168.10.120`. Ten en cuenta que esto se considera una dirección de 32 bits (4 x 8 bits = 32).
+
+Cada host en Internet debe tener una dirección IP única. En un entorno IPv4, existe un límite técnico de unos 4.3 billones de direcciones IP. Sin embargo, muchas de estas direcciones IP no son realmente utilizables por varias razones. También se han asignado direcciones IP a organizaciones que no han hecho uso completo de todas las direcciones IP que tenían disponibles.
+
+Mientras que parece que debe haber un montón de direcciones IP para ser utilizadas, varios factores (el creciente número de hosts en Internet, direcciones IP privadas reservadas, etc.) han causado un problema: el Internet comenzó a quedarse sin direcciones IP.
+
+Esto, en parte, animó el desarrollo de **IPv6**. IPv6 fue «creada» oficialmente en 1998. En una red IPv6 las direcciones son mucho más grandes, direcciones de 128 bits que se ven así: `2001:0db8:85a3:0042:1000:8a2e:0370:7334`. Esencialmente esto proporciona un grupo de direcciones mucho más grande, tan grande que quedarse sin direcciones en cualquier momento en un futuro cercano es muy poco probable.
+
+Es importante tener en cuenta que la diferencia entre IPv4 e IPv6 no es sólo «más direcciones IP». IPv6 tiene muchas otras características avanzadas que abordan algunas de las limitaciones de IPv4, como mayor velocidad, administración de paquetes más avanzada y transporte de datos más eficiente.
+
+Teniendo en cuenta todas las ventajas, podrías pensar que ahora todos los hosts estarían usando IPv6. Este no es el caso en absoluto. La mayoría de los dispositivos conectados a la red en el mundo todavía utilizan IPv4 (algo así como 98-99% de todos los dispositivos). Principalmente, hay dos razones:
+
+1. **La invención de NAT**: inventada para superar la posibilidad de quedarse sin direcciones IP en un entorno IPv4, la **Network Address Translation (NAT)** (o «Traducción de Direcciones de Red») utiliza una técnica para proporcionar más hosts de acceso a Internet. En resumen, un grupo de hosts se coloca en una red privada sin acceso directo a Internet; un router especial proporciona acceso a Internet y solamente este router necesita una dirección IP para comunicarse en Internet. En otras palabras, un grupo de hosts comparte una única dirección IP, lo que significa que muchas más computadoras se pueden conectar a Internet. Gracias a esta característica, la necesidad de pasar a IPv6 es menos crítica que antes de la invención de NAT.
+2. **Cuestiones de portabilidad**: la **portabilidad** es el cambio de una tecnología a otra. IPv6 tiene muchas novedades, pero todos los hosts tienen que ser capaces de utilizar estas características. Conseguir que todos en Internet (o incluso sólo algunos) hagan estos cambios supone un reto.
+
+La mayoría de los expertos están de acuerdo en que IPv6 reemplazará IPv4, así que entender los fundamentos de ambos es importante para las personas que trabajan en la industria de TI.
+
+<figure>
+<img src="diagrams/cap12-red-y-direccion-ip.svg" alt="Diagrama de red desde un PC cliente pasando por un router/gateway e Internet hasta un servidor web, y anatomía de una dirección IPv4 192.168.1.10/24 mostrando la parte de red y la parte de host">
+<figcaption>De la LAN a Internet, y anatomía de una dirección IPv4 con máscara /24: parte de red frente a parte de host.</figcaption>
+</figure>
+
+## 12.5 Configurando los Dispositivos de Red
+
+Cuando estás configurando los dispositivos de red, hay dos preguntas iniciales que debes considerar:
+
+1. **¿Configuración por cable o inalámbrica?** La manera de configurar un dispositivo inalámbrico será ligeramente diferente a un dispositivo por cable debido a algunas de las características adicionales que se encuentran normalmente en los dispositivos inalámbricos (así como la seguridad).
+2. **¿DHCP o dirección estática?** Un servidor DHCP proporciona información de la red, tal como tu dirección IP y la máscara de subred. Si no haces uso de un servidor DHCP, entonces tendrás que proporcionar manualmente esta información a tu host. Esto se llama utilizar una **dirección IP estática**.
+
+En términos generales, una máquina de escritorio utilizará la red por cable, mientras que una computadora portátil utilizará una red inalámbrica. Normalmente una máquina por cable utiliza una dirección IP estática, pero éstas pueden asignarse también a menudo a través de un servidor DHCP. En casi todos los casos, las máquinas inalámbricas utilizan DHCP ya que son casi siempre móviles y se conectan a diferentes redes.
+
+### 12.5.1 Configurar la Red usando una GUI
+
+Si tienes acceso a un entorno **GUI** (interfaz gráfica de usuario), probablemente también tendrás acceso a una herramienta basada en GUI que te permitirá configurar tu red. Estas herramientas pueden variar de una distribución a otra. Los ejemplos siguientes se realizaron en una máquina CentOS.
+
+Para iniciar la herramienta de configuración de red, haz clic en `System` (sistema) en la barra de menú, luego `Preferences` (preferencias) y `Network Connections` (conexiones de red).
+
+La herramienta primero enlista todos los dispositivos de red actuales. El dispositivo de red es `eth0`. Los dispositivos de red se denominan `eth0`, `eth1`, etc. Para modificar este dispositivo de red, haz clic en el nombre del dispositivo y haz clic en el botón `Edit` (editar).
+
+Si haces clic en la pestaña `IPv4 Settings` (ajustes de IPv4), recuerda que puedes asignar una dirección IP estática o utilizar un servidor DHCP (si está disponible). Este cambio se puede hacer haciendo clic en la lista desplegable junto a `Method` (método). Si seleccionas `Manual`, puedes cambiar la dirección actual haciendo clic en el área donde se especifica la dirección. Ten en cuenta que si eliges `Automatic (DHCP)`, la ubicación de las direcciones se verá en gris y no se podrá modificar.
+
+> Importante: Si cambias de automático (DHCP) a manual, todos los datos anteriores «desaparecen». Haciendo clic en el botón Cancelar y editando de nuevo el dispositivo `eth0`, volverán a aparecer los datos.
+
+La mayoría de los cambios realizados con las herramientas basadas en GUI surten efecto inmediatamente después de que se guardan. Sin embargo, en algunos casos, tendrás que reiniciar el equipo o ejecutar un comando como administrador para que los cambios tomen efecto.
+
+### 12.5.2 Configurar la Red usando el Archivo de Configuración
+
+Habrá momentos cuando no haya herramienta gráfica disponible. En esos casos, es útil conocer los archivos de configuración que se utilizan para almacenar y modificar los datos de la red. Estos archivos pueden variar según la distribución que estés utilizando. Los ejemplos siguientes se proporcionan para sistemas CentOS.
+
+#### 12.5.2.1 El Archivo Primario de Configuración de IPv4
+
+El archivo primario de configuración para una interfaz de red IPv4 es el archivo `/etc/sysconfig/network-scripts/ifcfg-eth0`. El siguiente ejemplo muestra cómo se ve un archivo cuando se configura para una dirección IP estática:
+
+```bash
+root@localhost:~# cat /etc/sysconfig/network-scripts/ifcfg-eth0
+```
+```
+DEVICE="eth0"
+BOOTPROTO=none
+NM_CONTROLLED="yes"
+ONBOOT=yes
+TYPE="Ethernet"
+UUID="98cf38bf-d91c-49b3-bb1b-f48ae7f2d3b5"
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=yes
+IPV6INOT=no
+NAME="System eth0"
+IPADDR=192.168.1.1
+PREFIX=24
+GATEWAY=192.168.1.1
+DNS1=192.168.1.2
+HWADDR=00:50:56:90:18:18
+LAST_CONNECT=1376319928
+root@localhost:~#
+```
+
+Si el dispositivo estuviera configurado para ser un cliente DHCP, entonces los valores `IPADDR`, `GATEWAY` y `DNS1` no se establecerían. Además, el valor `BOOTPROTO` se establecería a `dhcp`.
+
+#### 12.5.2.2 El Archivo Primario de Configuración de IPv6
+
+En un sistema CentOS, el archivo primario de configuración de IPv6 es el mismo archivo donde se almacena la configuración de IPv4: `/etc/sysconfig/network-scripts/ifcfg-eth0`. Si quieres que tu sistema tenga una dirección IPv6 estática, agrega lo siguiente al archivo de configuración:
+
+```
+IPV6INIT=yes
+IPV6ADDR=<IPv6 IP Address>
+IPV6_DEFAULTGW=<IPv6 IP Gateway Address>
+```
+
+Si quieres que tu sistema sea un cliente DHCP IPv6, agrega la siguiente configuración:
+
+```
+DHCPV6C=yes
+```
+
+También tienes que ajustar el archivo `/etc/sysconfig/network` de la siguiente manera:
+
+```
+NETWORKING_IPV6=yes
+```
+
+#### 12.5.2.3 Domain Name Service (DNS)
+
+Cuando a una computadora se le pide que acceda a una página web, como `www.example.com`, no necesariamente sabe qué dirección IP utilizar. Para que la computadora asocie una dirección IP con la solicitud de URL o nombre de host, la computadora depende del servicio **DNS** de otro equipo. A menudo, la dirección IP del servidor DNS se hace visible durante la solicitud de DHCP, mientras que una computadora recibe información importante para comunicarse en la red.
+
+La dirección del servidor DNS se almacena en el archivo `/etc/resolv.conf`. Un archivo `/etc/resolv.conf` típico se genera automáticamente y se ve así:
+
+```bash
+sysadmin@localhost:~$ cat /etc/resolv.conf
+```
+```
+nameserver 127.0.0.1
+sysadmin@localhost:~$
+```
+
+La configuración del servidor de nombres se establece a menudo en la dirección IP del servidor DNS. En el ejemplo siguiente se utiliza el comando `host`. Ten en cuenta que el servidor de ejemplo se asocia con la dirección IP `192.168.1.2` por el servidor DNS:
+
+```bash
+sysadmin@localhost:~$ host example.com
+```
+```
+example.com has address 192.168.1.2
+sysadmin@localhost:~$
+```
+
+También es común tener varias opciones de servidor de nombres, en caso de que un servidor DNS no responda.
+
+#### 12.5.2.4 Los Archivos Adicionales de Configuración de Red
+
+La tabla siguiente describe los archivos de configuración de red adicionales que debes conocer:
+
+| Archivo | Explicación |
+|---|---|
+| `/etc/hosts` | Contiene una tabla de nombres de host para las direcciones IP. Puede utilizarse para complementar un servidor DNS. |
+| `/etc/sysconfig/network` | Tiene dos configuraciones: `NETWORK` (determina si la red está activada `yes` o desactivada `no`) y `HOSTNAME` (define el nombre de host de la máquina local). |
+| `/etc/nsswitch.conf` | Se puede utilizar para modificar dónde se producen las búsquedas de nombre de host. Por ejemplo, la configuración `hosts: files dns` buscaría los nombres de host primero en el archivo `/etc/hosts` y después en el servidor DNS. Si cambias a `hosts: dns files`, la búsqueda se lleva a cabo primero en el servidor DNS. |
+
+#### 12.5.2.5 Reiniciar la Red
+
+Después de cambiar un archivo de configuración de red (por ejemplo, `/etc/sysconfig/network-scripts/ifcfg-eth0` o `/etc/resolv.conf`), necesitarás reiniciar la máquina o ejecutar un comando como administrador para que los cambios tomen efecto.
+
+## 12.6 Las Herramientas de Red
+
+Hay varios comandos que puedes utilizar para ver la información de la red. Estas herramientas también pueden ser útiles cuando quieras solucionar problemas de la red.
+
+### 12.6.1 El Comando ifconfig
+
+El comando `ifconfig` significa «interface configuration» (configuración de la interfaz) y se utiliza para mostrar la información de configuración de red. Es importante observar en la salida de abajo que la dirección IP del dispositivo de red principal (`eth0`) es `192.168.1.2` y que el dispositivo está activo (`UP`):
+
+```bash
+root@localhost:~# ifconfig
+```
+```
+eth0      Link encap:Ethernet  HWaddr b6:84:ab:e9:8f:0a
+          inet addr:192.168.1.2  Bcast:0.0.0.0  Mask:255.255.255.0
+          inet6 addr: fe80::b484:abff:fee9:8f0a/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:95 errors:0 dropped:4 overruns:0 frame:0
+          TX packets:9 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:25306 (25.3 KB)  TX bytes:690 (690.0 B)
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:6 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:6 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:460 (460.0 B)  TX bytes:460 (460.0 B)
+root@localhost:~#
+```
+
+El dispositivo `lo` se conoce como el dispositivo de **loopback** (bucle invertido). Es un dispositivo de red especial utilizado por el sistema cuando éste envía datos basados en red a sí mismo.
+
+El comando `ifconfig` también puede ser utilizado para modificar temporalmente la configuración de red. Normalmente estos cambios deben ser permanentes, por lo que utilizar el comando `ifconfig` para hacer tales cambios es algo bastante raro.
+
+El comando `ifconfig` se está volviendo obsoleto en algunas distribuciones de Linux y está siendo reemplazado por una forma del comando `ip`, específicamente `ip addr show`:
+
+```bash
+root@localhost:~# ip addr show
+```
+```
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+    valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+    valid_lft forever preferred_lft forever
+6476: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codelstate UP qlen 1000
+    link/ether b6:84:ab:e9:8f:0a brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.2/24 scope global eth0
+    valid_lft forever preferred_lft forever
+    inet6 fe80::b484:abff:fee9:8f0a/64 scope link
+    valid_lft forever preferred_lft forever
+root@localhost:~#
+```
+
+### 12.6.2 El Comando route
+
+Un **router** (o puerta de enlace) es una máquina que permitirá que los hosts de una red se comuniquen con otra red. Para ver una tabla que describe dónde se envían los paquetes de red utiliza el comando `route`:
+
+```bash
+root@localhost:~# route
+```
+```
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+192.168.1.0     *               255.255.255.0   U     0      0        0 eth0
+default         192.168.1.1     0.0.0.0        UG     0      0        0 eth0
+root@localhost:~#
+```
+
+La primera línea indica que cualquier paquete de red enviado a una máquina en la red `192.168.1` no se envía a una puerta de enlace (el `*` indica «no hay puerta de enlace»). La segunda línea indica que todos los otros paquetes de red se envían al host con la dirección IP `192.168.1.1` (el router).
+
+Algunos usuarios prefieren visualizar esta información con sólo datos numéricos, usando la opción `-n` para el comando `route`:
+
+```bash
+root@localhost:~# route -n
+```
+```
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0
+0.0.0.0        192.168.1.1     0.0.0.0         UG    0      0        0 eth0
+root@localhost:~#
+```
+
+El `0.0.0.0` se refiere a «todas las otras máquinas», o lo mismo que «default».
+
+El comando `route` se está volviendo obsoleto en algunas distribuciones de Linux y está siendo reemplazado por una forma del comando `ip`, específicamente `ip route show`:
+
+```bash
+root@localhost:~# ip route show
+```
+```
+default via 192.168.1.254 dev eth0 proto static
+192.168.1.0/24 dev eth0  proto kernel  scope link  src 192.168.1.2
+root@localhost:~#
+```
+
+### 12.6.3 El Comando ping
+
+El comando `ping` se puede utilizar para determinar si otra máquina es «accesible». Si el comando `ping` puede enviar un paquete de red a otra máquina y recibir una respuesta, entonces te deberías poder conectar a esa máquina.
+
+De forma predeterminada, el comando `ping` continuará enviando paquetes una y otra vez. Para limitar cuántos pings se deben enviar, utiliza la opción `-c`.
+
+Si el comando `ping` se realiza correctamente, verás una salida como la siguiente:
+
+```bash
+root@localhost:~# ping -c 4 192.168.1.2
+```
+```
+PING 192.168.1.2 (192.168.1.2) 56(84) bytes of data.
+64 bytes from 192.168.1.2: icmp_req=1 ttl=64 time=0.051 ms
+64 bytes from 192.168.1.2: icmp_req=2 ttl=64 time=0.064 ms
+64 bytes from 192.168.1.2: icmp_req=3 ttl=64 time=0.050 ms
+64 bytes from 192.168.1.2: icmp_req=4 ttl=64 time=0.043 ms
+
+--- 192.168.1.2 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 2999ms
+rtt min/avg/max/mdev = 0.043/0.052/0.064/0.007 ms
+root@localhost:~#
+```
+
+Si el comando `ping` falla, recibirás un mensaje que dice `Destination Host Unreachable` (Host de destino inalcanzable):
+
+```bash
+root@localhost:~# ping -c 4 192.168.1.1
+```
+```
+PING 192.168.1.1 (192.168.1.1) 56(84) bytes of data.
+From 192.168.1.2 icmp_seq=1 Destination Host Unreachable
+From 192.168.1.2 icmp_seq=2 Destination Host Unreachable
+From 192.168.1.2 icmp_seq=3 Destination Host Unreachable
+From 192.168.1.2 icmp_seq=4 Destination Host Unreachable
+
+--- 192.168.1.1 ping statistics ---
+4 packets transmitted, 0 received, +4 errors, 100% packet loss, time 2999ms
+pipe 4
+root@localhost:~#
+```
+
+Es importante tener en cuenta que sólo porque el comando `ping` falle, no significa que el sistema remoto sea realmente inalcanzable. Algunos administradores configuran sus máquinas para no responder a las solicitudes de ping.
+
+Esto suele pasar porque un servidor puede ser atacado por algo que se llama **ataque por denegación de servicio**. En este tipo de ataque, un servidor es saturado con un número masivo de paquetes de red. Al ignorar las peticiones de ping, el servidor es menos vulnerable.
+
+Como resultado, el comando `ping` puede ser útil para comprobar la disponibilidad de máquinas locales, pero no siempre para máquinas fuera de tu propia red.
+
+### 12.6.4 El Comando netstat
+
+El comando `netstat` es una poderosa herramienta que proporciona una gran cantidad de información de la red. Puede utilizarse para mostrar información acerca de conexiones de red, así como para mostrar la tabla de enrutamiento similar al comando `route`.
+
+Por ejemplo, puedes querer mostrar estadísticas acerca del tráfico de red mediante la opción `-i`:
+
+```bash
+root@localhost:~# netstat -i
+```
+```
+Kernel Interface table
+Iface   MTU Met   RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
+eth0       1500 0       137      0      4 0        12      0      0      0 BMRU
+lo        65536 0        18      0      0 0        18      0      0      0 LRU
+root@localhost:~#
+```
+
+Las estadísticas más importantes de la salida anterior son `TX-OK` y `TX-ERR`. Un alto porcentaje de `TX-ERR` puede indicar un problema en la red, tal como mucho tráfico de red.
+
+Si quieres utilizar el comando `netstat` para mostrar la información de enrutamiento, utiliza la opción `-r`:
+
+```bash
+root@localhost:~# netstat -r
+```
+```
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+192.168.1.0     *               255.255.255.0   U         0 0          0 eth0
+default         192.168.1.1     0.0.0.0        UG         0 0          0 eth0
+root@localhost:~#
+```
+
+El comando `netstat` se utiliza comúnmente para mostrar puertos abiertos. Un **puerto** es un número único que está asociado con un servicio proporcionado por un host. Si el puerto está abierto, el servicio está disponible para otros hosts.
+
+Por ejemplo, puedes iniciar sesión en un host desde otro host utilizando un servicio llamado **SSH**. El servicio SSH tiene asignado el puerto #22. Si el puerto #22 está abierto, el servicio está disponible para otros hosts.
+
+Es importante tener en cuenta que el host mismo también debe tener los servicios en ejecución; esto significa que debe iniciarse el programa que permite a los usuarios remotos conectarse (que por lo general está iniciado en la mayoría de las distribuciones de Linux).
+
+Para ver una lista de todos los puertos actualmente abiertos, puedes utilizar el siguiente comando:
+
+```bash
+root@localhost:~# netstat -tln
+```
+```
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 192.168.1.2:53          0.0.0.0:*               LISTEN
+tcp        0      0 127.0.0.1:53            0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+tcp        0      0 127.0.0.1:953           0.0.0.0:*               LISTEN
+tcp6       0      0 :::53                   :::*                    LISTEN
+tcp6       0      0 :::22                  :::*                    LISTEN
+tcp6       0      0 ::1:953                 :::*                    LISTEN
+root@localhost:~#
+```
+
+Como se puede ver en la salida anterior, el puerto #22 está «escuchando» (`LISTEN`), lo que significa que está abierto.
+
+En el ejemplo anterior, `-t` se refiere a TCP, `-l` significa «listening» (escuchando: cuáles de los puertos están escuchando) y `-n` significa «mostrar números, no nombres».
+
+A veces, mostrar los nombres puede ser más útil. Sólo elimina la opción `-n`:
+
+```bash
+root@localhost:~# netstat -tl
+```
+```
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address          State
+tcp        0      0 cserver.example.:domain *:*                     LISTEN
+tcp        0      0 localhost:domain        *:*                     LISTEN
+tcp        0      0 *:ssh                   *:*                     LISTEN
+tcp        0      0 localhost:953           *:*                     LISTEN
+tcp6       0      0 [::]:domain             [::]:*                  LISTEN
+tcp6       0      0 [::]:ssh                [::]:*                  LISTEN
+tcp6       0      0 localhost:953           [::]:*                  LISTEN
+root@localhost:~#
+```
+
+En algunas distribuciones se puede ver el siguiente mensaje en la página man del comando `netstat`:
+
+```
+NOTE
+     This program is obsolete. Replacement for netstat is ss. Replacement for
+     netstat -r is ip route. Replacement for netstat -i is ip -s link.
+     Replacement for netstat -g is ip maddr.
+```
+
+Aunque el comando `netstat` no se sigue desarrollando, sigue siendo una excelente herramienta para visualizar información de la red. El objetivo es eventualmente reemplazar el comando `netstat` por comandos como `ss` e `ip`. Sin embargo, es importante tener en cuenta que esto puede tomar algún tiempo.
+
+El comando `netstat` viene en este curso ya que está disponible en todas las distribuciones de Linux, todavía es ampliamente utilizado y es un objetivo del examen de Linux Essentials (los comandos `ss` e `ip` no lo son).
+
+### 12.6.5 El Comando dig
+
+Puede haber ocasiones en las que necesites probar la funcionalidad del servidor DNS que tu host está utilizando. Una forma de hacerlo es utilizar el comando `dig`. Este comando realizará consultas en el servidor DNS para determinar si la información necesaria está disponible en el servidor.
+
+En el ejemplo siguiente, se utiliza el comando `dig` para determinar la dirección IP del host `example.com`:
+
+```bash
+root@localhost:~# dig example.com
+```
+```
+; <<>> DiG 9.8.1-P1 <<>> example.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 45155
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; ANSWER SECTION:
+example.com.            86400   IN      A       192.168.1.2
+;; AUTHORITY SECTION:
+example.com.            86400   IN      NS      example.com.
+
+;; Query time: 0 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1)
+;; WHEN: Tue Dec  8 17:54:41 2015
+;; MSG SIZE  rcvd: 59
+root@localhost:~#
+```
+
+Observa que la respuesta incluye la dirección IP `192.168.1.2`, lo que significa que el servidor DNS tiene la dirección IP asociada a la información de traducción del nombre de host en su base de datos.
+
+Si el servidor DNS no tiene la información solicitada, está configurado para mandar la solicitud a otros servidores DNS. Si ninguno de ellos tiene la información solicitada, recibirás un mensaje de error:
+
+```bash
+root@localhost:~# dig sample.com
+```
+```
+; <<>> DiG 9.8.1-P1 <<>> sample.com
+;; global options: +cmd
+;; connection timed out; no servers could be reached
+root@localhost:~#
+```
+
+### 12.6.6 El Comando host
+
+En su forma más simple, el comando `host` trabaja con DNS para asociar un nombre de host a una dirección IP:
+
+```bash
+root@localhost:~# host example.com
+```
+```
+example.com has address 192.168.1.2
+root@localhost:~#
+```
+
+El comando `host` se puede utilizar también en sentido inverso, si se conoce una dirección IP pero no el nombre del dominio:
+
+```bash
+root@localhost:~# host 192.168.1.2
+```
+```
+2.1.168.192.in-addr.arpa domain name pointer example.com.
+2.1.168.192.in-addr.arpa domain name pointer cserver.example.com.
+root@localhost:~#
+```
+
+Existen otras opciones para consultar los diferentes aspectos de un DNS, como el registro **CNAME** (nombre canónico - alias):
+
+```bash
+root@localhost:~# host -t CNAME example.com
+```
+```
+example.com has no CNAME record
+root@localhost:~#
+```
+
+Puesto que muchos servidores DNS guardan una copia de `example.com`, los registros **SOA** (Start of Authority) indican el servidor principal para el dominio:
+
+```bash
+root@localhost:~# host -t SOA example.com
+```
+```
+example.com has SOA record example.com. cserver.example.com. 2 604800 86400 2419200 604800
+root@localhost:~#
+```
+
+Puedes encontrar una lista completa de información sobre DNS en relación con `example.com` usando la opción `-a` («all» o «todo»):
+
+```bash
+root@localhost:~# host -a example.com
+```
+```
+Trying "example.com"
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 3549
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 1
+
+;; QUESTION SECTION:
+;example.com.                   IN      ANY
+
+;; ANSWER SECTION:
+example.com.            86400   IN      SOA     example.com. cserver.example.com. 2 604800 86400 2419200 604800
+example.com.            86400   IN      NS      example.com.
+example.com.            86400   IN      A       192.168.1.2
+
+;; ADDITIONAL SECTION:
+example.com.            86400   IN      A       192.168.1.2
+
+Received 119 bytes from 127.0.0.1#53 in 0 ms
+root@localhost:~#
+```
+
+### 12.6.7 El Comando ssh
+
+El comando `ssh` te permitirá conectarte a otra máquina a través de la red, iniciar sesión y luego realizar tareas en el equipo remoto.
+
+Si utilizas el comando `ssh` y sólo proporcionas el nombre de la máquina o la dirección IP para iniciar la sesión, el comando asumirá que quieres iniciar la sesión con el mismo nombre con el que actualmente estás registrado. Si quieres utilizar un nombre de usuario distinto, utiliza la sintaxis `username@hostname`:
+
+```bash
+root@localhost:~# ssh bob@test
+```
+```
+The authenticity of host 'test (127.0.0.1)' can't be established.
+RSA key fingerprint is c2:0d:ff:27:4c:f8:69:a9:c6:3e:13:da:2f:47:e4:c9.
+Are you sure you want to continue connection (yes/no)? yes
+Warning: Permanently added 'test' (RSA) to the list of known hosts.
+bob@test's password:
+bob@test:~$
+Fri Oct   4 16:14:43 CDT 2013
+bob@test:~$
+```
+
+#### 12.6.7.1 Algoritmo RSA de Clave Pública
+
+El primer prompt te pide que verifiques la identidad de la máquina en la que inicias sesión. En la mayoría de los casos vas a responder `yes` (sí). Aunque puedas validar con el administrador de la máquina remota para asegurarte de que la clave **RSA** es correcta, este no es realmente el propósito de esta consulta. Realmente está diseñado para futuros inicios de sesión.
+
+Después de que respondas `yes`, la clave RSA de la máquina remota se almacena en tu sistema local. Cuando intentes hacer un `ssh` a esta misma máquina en el futuro, la clave RSA proporcionada por el equipo remoto se compara con la copia almacenada en el equipo local. Si coinciden, entonces aparece el prompt del nombre de usuario. Si no coinciden, verás un error similar al siguiente:
+
+```bash
+sysadmin@localhost:~$ ssh bob@test
+```
+```
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@   WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!   @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that the RSA host key has just been changed.
+The fingerprint for the RSA key sent by the remote host is
+c2:0d:ff:27:4c:f8:69:a9:c6:3e:13:da:2f:47:e4:c9.
+Please contact your system administrator.
+Add correct host key in /home/sysadmin/.ssh/known_hosts to get rid of this message.
+Offending key in /home/sysadmin/.ssh/known_hosts:1
+RSA host key for test has changed and you have requested strict checking.
+Host key verification failed.
+sysadmin@localhost:~$
+```
+
+Este error puede indicar que un host no autorizado ha reemplazado al host correcto. Consulta con el administrador del sistema remoto. Si el sistema fuese recientemente reinstalado, tendría una nueva clave RSA, lo que podría estar causando este error.
+
+En caso de que este mensaje de error sea debido a que una máquina remota fue reinstalada, puedes eliminar el archivo `~/.ssh/known_hosts` de tu sistema local (o solo quitar la entrada para esa máquina en específico) e intentar conectarte de nuevo:
+
+```bash
+sysadmin@localhost:~$ cat ~/.ssh/known_hosts
+```
+```
+test ssh-rsa AAAAB3NzaC1yc2EAAAAmIwAAAQEAklOUpkDHrfHY17SbrmTIp/RZ0V4DTxgq9wzd+ohy006SWDSGPA+nafzlHDPOW7vdI4mZ5ew18KL4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSrg0cda3Pbv7kOdJ/MTyBlWXFCRH+Cv3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7BA
+t5FaiKoAfncM1Q8x3+2V0Ww71/eIFmb1zuUFljHYTprrX88XypNDvjYNby6vw/Pb0rwprz/Tn
+mZAW3UX+PnTPI89ZPmNBLuxyrD2cE86Z/il8b+gw3r3+1nJotmIkjn2so1d01QraTlMqVSsbx
+NrRFi9wrf+ghw==
+```
+```bash
+sysadmin@localhost:~$ rm ~/.ssh/known_hosts
+sysadmin@localhost:~$ ssh bob@test
+```
+```
+The authenticity of host 'test (127.0.0.1)' can't be established.
+RSA key fingerprint is c2:0d:ff:27:4c:f8:69:a9:c6:3e:13:da:2f:47:e4:c9.
+Are you sure you want to continue connection (yes/no)? yes
+Warning: Permanently added 'test' (RSA) to the list of known hosts.
+bob@test's password:
+Last login: Fri Oct   4 16:14:39 CDT 2013  from localhost
+bob@test:~$
+```
+
+#### 12.6.7.2 Regresar a la Máquina Local
+
+Para volver a la máquina local utiliza el comando `exit` (salir):
+
+```bash
+bob@test:~$ exit
+```
+```
+logout
+Connection to test closed.
+sysadmin@localhost:~#
+```
+
+> Advertencia: ¡Ten cuidado al utilizar el comando `exit` muchas veces, ya que se cerrará la ventana de la terminal en la que estás trabajando!
+
+### Resumen del capítulo
+
+- Los conceptos básicos de red (**host**, **red**, **Internet**, **servidor**, **servicio**, **cliente**, **router**) y de funciones de red (**paquete**, **dirección IP**, **máscara de red**, **nombre de host**, **DHCP**, **DNS**, **Ethernet**, **TCP/IP**) forman el vocabulario esencial para configurar y administrar una red Linux.
+- Existen dos tipos de direcciones IP: **IPv4** (32 bits, formato como `192.168.10.120`) e **IPv6** (128 bits, formato como `2001:0db8:85a3:0042:1000:8a2e:0370:7334`); IPv4 sigue dominando gracias en parte a la tecnología **NAT**, que permite compartir una única dirección pública entre varios hosts.
+- La configuración de red se puede hacer mediante herramientas **GUI** o editando archivos como `/etc/sysconfig/network-scripts/ifcfg-eth0`, `/etc/resolv.conf`, `/etc/hosts`, `/etc/sysconfig/network` y `/etc/nsswitch.conf`, dependiendo de si se usa **DHCP** o una **dirección IP estática**.
+- Comandos como `ifconfig`/`ip addr show` y `route`/`ip route show` muestran y permiten ajustar la configuración de interfaces y tablas de enrutamiento, mientras que `ping` verifica la accesibilidad de otro host.
+- El comando `netstat` (en proceso de reemplazo por `ss` e `ip`) permite ver estadísticas de tráfico, tablas de rutas y puertos abiertos (como el puerto 22 de SSH); los comandos `dig` y `host` permiten consultar información DNS de un dominio.
+- El comando `ssh` permite iniciar sesión de forma remota y segura en otra máquina, verificando la identidad del host remoto mediante claves **RSA** almacenadas en `~/.ssh/known_hosts`.
