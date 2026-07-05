@@ -7,7 +7,7 @@ El objetivo de este repositorio es **compartir el conocimiento adquirido** a lo 
 ## Índice de directorios
 
 - **[`asignaturas/`](asignaturas/)** — Documentación y apuntes de las asignaturas del curso oficial. Un subdirectorio por asignatura.
-- **[`cursos/`](cursos/)** — Cursos adicionales realizados antes o durante el curso lectivo (certificaciones, MOOCs, cursos de terceros, etc.). Un subdirectorio por curso.
+- **[`cursos/`](cursos/README.md)** — Cursos adicionales realizados antes o durante el curso lectivo (certificaciones, MOOCs, cursos de terceros, etc.). Un subdirectorio por curso.
 - **[`proyectos/`](proyectos/)** — Proyectos desarrollados a lo largo del curso. Un subdirectorio por proyecto.
 
 Dentro de `asignaturas/` y `cursos/`, cada subdirectorio con contenido derivado de material en bruto sigue una misma convención interna:
@@ -16,12 +16,6 @@ Dentro de `asignaturas/` y `cursos/`, cada subdirectorio con contenido derivado 
 - `00-indice.md` y demás `.md` — documentación enriquecida en Markdown, generada a partir de `raw/`, organizada por capítulos o secciones.
 - `diagrams/` — diagramas y esquemas de apoyo en SVG.
 - `other_formats/` — el mismo contenido compilado en PDF y EPUB.
-
-## Índice de cursos
-
-| Curso | Índice |
-|-------|--------|
-| Fundamentos de Linux | [00-indice.md](cursos/fundamentos-linux/00-indice.md) |
 
 ## Descargo de responsabilidad
 
