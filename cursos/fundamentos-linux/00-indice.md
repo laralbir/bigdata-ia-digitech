@@ -35,5 +35,6 @@ Cada capítulo enlazado arriba es un documento Markdown independiente y autocont
 
 | Versión | Fecha | Cambios |
 |---------|-------|---------|
+| 1.2 | 2026-07-05 | Añadida portada al EPUB. |
 | 1.1 | 2026-07-05 | Corregida la alineación del calendario ASCII (2014) del capítulo 1. |
 | 1.0 | 2026-07-05 | Versión inicial: índice, 16 capítulos, diagramas SVG y compilación en PDF/EPUB. |

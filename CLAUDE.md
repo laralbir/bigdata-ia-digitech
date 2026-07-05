@@ -41,6 +41,7 @@ Reglas clave:
 - Cada capítulo es un documento Markdown autocontenido: conserva la información técnica original (ejemplos, comandos, definiciones) y añade formato enriquecido — encabezados, negritas en términos clave, bloques de código, tablas — y, cuando ayude a la comprensión, un resumen de puntos clave al final.
 - Siempre que aporte claridad, incluir diagramas, esquemas o ilustraciones de apoyo en **SVG** (preferente, en `diagrams/`), PNG o arte ASCII embebido en el propio Markdown.
 - `other_formats/` contiene el temario completo compilado en **PDF** y **EPUB**, generado a partir de los Markdown.
+- Todo **EPUB** generado debe incluir una **portada**. El diseño y contenido de la portada quedan a criterio creativo de Claude (tipografía, colores, motivos gráficos relacionados con la temática), manteniendo coherencia con el estilo visual del resto del material (diagramas SVG, paleta de colores sobria).
 - Ver [cursos/fundamentos-linux/](cursos/fundamentos-linux/) como ejemplo de referencia de esta convención ya aplicada.
 
 `proyectos/` no sigue necesariamente esta convención de `raw/diagrams/other_formats`, ya que su contenido son proyectos (código, memorias, entregables) y no material transcrito de clases; su estructura interna puede adaptarse a lo que cada proyecto requiera.
@@ -59,3 +60,4 @@ Reglas clave:
 - Este es un repositorio personal de apuntes de estudio, no un producto de software: no se generan tests, builds ni pipelines de CI para su contenido.
 - **Antes de cada `git push`**, comprobar que el `README.md` de la raíz sigue reflejando el estado actual del repositorio (índice de directorios, asignaturas/cursos/proyectos presentes) y actualizarlo si es necesario.
 - **Al hacer `git commit`**, incluir únicamente los ficheros que ya estén en stage (`git add` previo); no añadir automáticamente otros ficheros modificados o sin trackear.
+- El texto de los mensajes de commit debe seguir la convención **Conventional Commits** (`tipo(ámbito opcional): descripción`), con el tipo en inglés (`feat`, `fix`, `docs`, `chore`, `refactor`, `style`, `test`) y la descripción en español. Ejemplo: `docs(fundamentos-linux): añadir portada al EPUB`.

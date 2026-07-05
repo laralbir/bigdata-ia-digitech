@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2400" font-family="Helvetica Neue, Arial, sans-serif">
+  <title>Portada — Fundamentos de Linux, Curso Completo</title>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0d1b2a"/>
+      <stop offset="100%" stop-color="#132a42"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1a4d8b"/>
+      <stop offset="100%" stop-color="#3f8cd6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="2400" fill="url(#bg)"/>
+
+  <!-- top accent bar -->
+  <rect x="0" y="0" width="1600" height="14" fill="url(#accent)"/>
+
+  <!-- decorative grid of faint dots suggesting a filesystem/network -->
+  <g fill="#1a4d8b" opacity="0.35">
+    <circle cx="120" cy="140" r="4"/>
+    <circle cx="200" cy="140" r="4"/>
+    <circle cx="280" cy="140" r="4"/>
+    <circle cx="1320" cy="2260" r="4"/>
+    <circle cx="1400" cy="2260" r="4"/>
+    <circle cx="1480" cy="2260" r="4"/>
+  </g>
+
+  <!-- terminal window -->
+  <g transform="translate(220,320)">
+    <rect x="0" y="0" width="1160" height="640" rx="18" fill="#0a1420" stroke="#3f8cd6" stroke-width="2.5"/>
+    <rect x="0" y="0" width="1160" height="64" rx="18" fill="#132a42"/>
+    <rect x="0" y="46" width="1160" height="18" fill="#132a42"/>
+    <circle cx="42" cy="32" r="11" fill="#e0554f"/>
+    <circle cx="80" cy="32" r="11" fill="#e0b34f"/>
+    <circle cx="118" cy="32" r="11" fill="#4fae5b"/>
+    <text x="580" y="40" text-anchor="middle" font-size="20" fill="#8fa9c4" font-family="Menlo, Consolas, monospace">usuario@linux: ~</text>
+
+    <g font-family="Menlo, Consolas, monospace" font-size="26" fill="#c9e2ff">
+      <text x="48" y="140"><tspan fill="#4fae5b">usuario@linux</tspan><tspan fill="#8fa9c4">:</tspan><tspan fill="#3f8cd6">~</tspan><tspan fill="#c9e2ff">$ whoami</tspan></text>
+      <text x="48" y="185" fill="#ffffff">root</text>
+      <text x="48" y="240"><tspan fill="#4fae5b">usuario@linux</tspan><tspan fill="#8fa9c4">:</tspan><tspan fill="#3f8cd6">~</tspan><tspan fill="#c9e2ff">$ uname -a</tspan></text>
+      <text x="48" y="285" fill="#ffffff">Linux kernel 6.x — GNU/Linux</text>
+      <text x="48" y="340"><tspan fill="#4fae5b">usuario@linux</tspan><tspan fill="#8fa9c4">:</tspan><tspan fill="#3f8cd6">~</tspan><tspan fill="#c9e2ff">$ ls -l /curso</tspan></text>
+      <text x="48" y="385" fill="#ffffff">17 capítulos · teoría, práctica y laboratorios</text>
+      <text x="48" y="440"><tspan fill="#4fae5b">usuario@linux</tspan><tspan fill="#8fa9c4">:</tspan><tspan fill="#3f8cd6">~</tspan><tspan fill="#c9e2ff">$ _</tspan></text>
+      <rect x="118" y="422" width="16" height="30" fill="#c9e2ff">
+        <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </g>
+
+  <!-- title -->
+  <text x="800" y="1155" text-anchor="middle" font-size="92" font-weight="bold" fill="#ffffff" letter-spacing="2">FUNDAMENTOS</text>
+  <text x="800" y="1255" text-anchor="middle" font-size="92" font-weight="bold" fill="#ffffff" letter-spacing="2">DE LINUX</text>
+
+  <rect x="620" y="1310" width="360" height="4" fill="url(#accent)"/>
+
+  <text x="800" y="1380" text-anchor="middle" font-size="42" fill="#8fa9c4" letter-spacing="4">CURSO COMPLETO</text>
+
+  <!-- simplified terminal-prompt emblem (abstract, not a trademarked mascot) -->
+  <g transform="translate(800,1620)">
+    <circle r="130" fill="none" stroke="#1a4d8b" stroke-width="2"/>
+    <circle r="100" fill="#132a42" stroke="#3f8cd6" stroke-width="2"/>
+    <text x="0" y="18" text-anchor="middle" font-size="72" font-family="Menlo, Consolas, monospace" fill="#4fae5b">&gt;_</text>
+  </g>
+
+  <!-- footer -->
+  <text x="800" y="2220" text-anchor="middle" font-size="30" fill="#8fa9c4">Cisco Networking Academy</text>
+  <text x="800" y="2266" text-anchor="middle" font-size="22" fill="#5a7699">Curso de Especialización en Big Data e IA para FP · Digitech</text>
+
+  <!-- bottom accent bar -->
+  <rect x="0" y="2386" width="1600" height="14" fill="url(#accent)"/>
+</svg>
