@@ -98,7 +98,7 @@ Do Lu Ma Mi Ju Vi Sá Do Lu Ma Mi Ju Vi Sa Do Lu Ma Mi Ju Vi Sá
 27 28 29 30           25 26 27 28 29 30 31  29 30
         Julio                 Agosto              Septiembre
 Do Lu Ma Mi Ju Vi Sá Do Lu Ma Mi Ju Vi Sa Do Lu Ma Mi Ju Vi Sá
-                      1  2  3  4  5                 1  2      1  2  3  4  5  6
+      1  2  3  4  5                 1  2      1  2  3  4  5  6
 ```
 
 <figure>
