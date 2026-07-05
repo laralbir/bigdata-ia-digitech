@@ -30,3 +30,10 @@ En conjunto, el temario cubre los objetivos típicos de las certificaciones **LP
 ## Cómo usar este material
 
 Cada capítulo enlazado arriba es un documento Markdown independiente y autocontenido, enriquecido a partir de las transcripciones originales del curso: conserva toda la información técnica, ejemplos de terminal y explicaciones originales, con mejoras de formato (encabezados, negritas en términos clave, bloques de código, tablas) y un resumen final de puntos clave por capítulo. Todo el contenido está disponible también en un único PDF (`Fundamentos-de-Linux-Curso-Completo.pdf`) que reúne este índice y los 15 capítulos en un solo documento para lectura o impresión.
+
+## Historial de versiones
+
+| Versión | Fecha | Cambios |
+|---------|-------|---------|
+| 1.1 | 2026-07-05 | Corregida la alineación del calendario ASCII (2014) del capítulo 1. |
+| 1.0 | 2026-07-05 | Versión inicial: índice, 16 capítulos, diagramas SVG y compilación en PDF/EPUB. |

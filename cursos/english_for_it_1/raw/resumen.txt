@@ -1,0 +1,23 @@
+Utilizado por nuevas empresas y gigantes tecnológicos como Google, Facebook, Netflix y más, Python le ofrece infinitas posibilidades para crear proyectos de software a pequeña y gran escala. Fácil de usar con un código fácil de leer, Python es un excelente primer lenguaje de programación para aprender y no requiere conocimientos previos de programación. Las habilidades de Python lo abren a carreras en casi cualquier industria y son necesarias si desea continuar con roles de ingeniería y desarrollo de software más avanzados y mejor pagados, como ingeniero de software, administrador de sistemas e ingeniero de seguridad.
+
+En este curso, aprenderá habilidades en demanda, como diseñar, desarrollar y mejorar programas de computadora, métodos para analizar problemas usando programación, mejores prácticas de programación y más. El curso también lo prepara para la certificación PCEP: programador de Python de nivel de entrada certificado (examen PCEP-30-0x).
+Esto es lo que aprenderá.
+
+
+PE1: Módulo 1. Introducción a Python y a la Programación Informática
+
+
+
+PE1: Módulo 2. Tipos de datos, Variables, Operaciones Básicas de Entrada y Salida, Operadores Básicos
+
+
+
+PE1: Módulo 3. Valores Booleanos, Ejecución Condicional, Bucles, Listas y su procesamiento, Operaciones Lógicas y de Bit a Bit
+
+
+
+PE1: Módulo 4. Funciones, Tuplas, Diccionarios, Excepciones y Procesamiento de Datos
+
+
+
+Proyecto Final
