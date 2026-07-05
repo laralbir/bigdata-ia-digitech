@@ -17,6 +17,12 @@ Dentro de `asignaturas/` y `cursos/`, cada subdirectorio con contenido derivado 
 - `diagrams/` — diagramas y esquemas de apoyo en SVG.
 - `other_formats/` — el mismo contenido compilado en PDF y EPUB.
 
+## Índice de cursos
+
+| Curso | Índice |
+|-------|--------|
+| Fundamentos de Linux | [00-indice.md](cursos/fundamentos-linux/00-indice.md) |
+
 ## Descargo de responsabilidad
 
 El contenido de este repositorio se comparte con fines exclusivamente **educativos y de divulgación**, como forma de compartir el conocimiento adquirido durante el curso.
